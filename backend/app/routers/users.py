@@ -19,6 +19,8 @@ def update_me(payload: UserUpdate, db: Session = Depends(get_db), current_user: 
         user.name = payload.name
     if payload.phone is not None:
         user.phone = payload.phone
+    if payload.avatar_url is not None:
+        user.avatar_url = payload.avatar_url
     db.add(user)
     db.commit()
     db.refresh(user)

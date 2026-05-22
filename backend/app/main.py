@@ -1,4 +1,7 @@
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 from .db import Base, engine
 from .routers import auth, books, listings, users, categories, messages
 
@@ -65,6 +68,20 @@ app = FastAPI(
         "email": "contact@rook.com",
     },
 )
+
+candidate_frontend_dirs = [
+    Path(__file__).resolve().parents[2] / "frontend",
+    Path(__file__).resolve().parents[1] / "frontend",
+]
+frontend_dir = next((p for p in candidate_frontend_dirs if p.exists()), None)
+if frontend_dir:
+    app.mount("/ui", StaticFiles(directory=str(frontend_dir), html=True), name="ui")
+
+@app.get("/", include_in_schema=False)
+def root():
+    if frontend_dir:
+        return RedirectResponse(url="/ui/")
+    return {"status": "ok"}
 
 @app.get("/health")
 def health():

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="./assets/js/theme.js"></script>
+    <link rel="stylesheet" href="./assets/css/theme.css" />
+    <link rel="stylesheet" href="./assets/css/pages.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
+    <title>Rook</title>
+  </head>
+  <body class="bg-background font-body-md text-on-background antialiased">
+    <header class="sticky top-0 z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant/30">
+      <div class="max-w-container-max mx-auto px-margin-page h-16 flex items-center justify-between gap-4">
+        <a class="font-display-lg text-headline-md text-primary" href="#/home" data-nav="/home">Rook</a>
+        <nav class="flex items-center gap-4 text-label-md">
+          <a class="text-on-surface-variant hover:text-primary transition-colors" href="#/home" data-nav="/home">Home</a>
+          <a class="text-on-surface-variant hover:text-primary transition-colors" href="#/marketplace" data-nav="/marketplace">Marketplace</a>
+          <a class="text-on-surface-variant hover:text-primary transition-colors" href="#/sellerdashboard" data-nav="/sellerdashboard">Sell</a>
+          <a class="text-on-surface-variant hover:text-primary transition-colors" href="#/messages" data-nav="/messages">Messages</a>
+          <a class="text-on-surface-variant hover:text-primary transition-colors" href="#/profile" data-nav="/profile">Profile</a>
+          <a class="text-on-surface-variant hover:text-primary transition-colors" href="#/admin-dashboard" data-nav="/admin-dashboard">Admin</a>
+          <a class="text-on-surface-variant hover:text-primary transition-colors" href="#/crud" data-nav="/crud">CRUD</a>
+        </nav>
+        <div class="flex items-center gap-3">
+          <div class="text-[12px] text-on-surface-variant" id="spa-who">Guest</div>
+          <button class="px-3 py-2 rounded-lg bg-primary text-on-primary hover:opacity-90 text-[12px]" id="spa-auth" type="button">Sign in</button>
+        </div>
+      </div>
+    </header>
+
+    <div id="spa-view"></div>
+
+    <script type="module" src="./assets/js/spa.js"></script>
+  </body>
+</html>

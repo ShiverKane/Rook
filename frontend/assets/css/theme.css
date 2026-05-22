@@ -1,0 +1,36 @@
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: #f8faf6;
+  color: #191c1a;
+  -webkit-font-smoothing: antialiased;
+}
+
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  vertical-align: middle;
+}
+
+.soft-shadow {
+  box-shadow: 0 20px 25px -5px rgba(13, 99, 27, 0.04), 0 8px 10px -6px rgba(13, 99, 27, 0.04);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #e1e3df;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #bfcaba;
+}

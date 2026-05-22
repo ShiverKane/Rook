@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Search</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="../assets/js/theme.js"></script>
+    <link rel="stylesheet" href="../assets/css/theme.css" />
+    <link rel="stylesheet" href="../assets/css/pages.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
+  </head>
+  <body class="bg-background text-on-background font-body-md antialiased">
+    <header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 shadow-sm">
+      <div class="max-w-container-max mx-auto px-margin-page flex items-center justify-between h-20">
+        <a class="font-display-lg text-headline-md text-primary" href="./home.html">Curated Sanctuary</a>
+        <nav class="hidden md:flex items-center gap-6 font-body-md text-label-md">
+          <a class="text-on-surface-variant hover:text-primary transition-colors" href="./marketplace.html">Marketplace</a>
+          <a class="text-on-surface-variant hover:text-primary transition-colors" href="./sellerdashboard.html">Sell</a>
+          <a class="text-on-surface-variant hover:text-primary transition-colors" href="./messages.html">Messages</a>
+        </nav>
+        <a class="p-2 rounded-full hover:bg-surface-container-low transition-all active:scale-95" href="./profile.html">
+          <span class="material-symbols-outlined text-primary">account_circle</span>
+        </a>
+      </div>
+    </header>
+    <main class="pt-32 pb-stack-lg max-w-container-max mx-auto px-margin-page">
+      <h1 class="font-headline-lg text-headline-lg text-on-surface">Search</h1>
+      <p class="text-on-surface-variant mt-2">Search books and listings by title, author, ISBN.</p>
+      <div class="mt-stack-md grid grid-cols-1 md:grid-cols-3 gap-gutter">
+        <div class="md:col-span-2 bg-surface-container-lowest border border-outline-variant/20 rounded-xl p-6">
+          <div class="flex items-center gap-3 bg-surface-container-low px-4 py-3 rounded-full border border-outline-variant/20">
+            <span class="material-symbols-outlined text-outline">search</span>
+            <input class="bg-transparent border-none focus:ring-0 text-body-md w-full placeholder:text-outline/60" placeholder="Type to search..." type="text" />
+          </div>
+          <div class="mt-6 space-y-3">
+            <div class="p-4 rounded-xl bg-surface-container-low hover:bg-surface-container-high transition-all">
+              <div class="font-headline-md text-headline-md">Rage of angels</div>
+              <div class="text-on-surface-variant mt-1">Sidney Sheldon</div>
+            </div>
+            <div class="p-4 rounded-xl bg-surface-container-low hover:bg-surface-container-high transition-all">
+              <div class="font-headline-md text-headline-md">Gilead</div>
+              <div class="text-on-surface-variant mt-1">Marilynne Robinson</div>
+            </div>
+          </div>
+        </div>
+        <aside class="bg-surface-container-lowest border border-outline-variant/20 rounded-xl p-6">
+          <div class="font-headline-md text-headline-md">Filters</div>
+          <div class="mt-4 space-y-4">
+            <div>
+              <label class="text-label-md text-on-surface-variant" for="lang">Language</label>
+              <select class="w-full mt-2 bg-surface-container-low border border-outline-variant/20 rounded-lg px-4 py-3 focus:ring-1 focus:ring-primary" id="lang">
+                <option>Any</option>
+                <option>vi</option>
+                <option>en</option>
+                <option>ja</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-label-md text-on-surface-variant" for="price">Max price</label>
+              <input class="w-full mt-2 bg-surface-container-low border border-outline-variant/20 rounded-lg px-4 py-3 focus:ring-1 focus:ring-primary" id="price" placeholder="100000" type="number" />
+            </div>
+            <button class="w-full bg-primary text-on-primary px-6 py-3 rounded-lg font-label-md hover:opacity-90 transition-all" type="button">Apply</button>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </body>
+</html>
