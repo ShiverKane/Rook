@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 class UserCreate(BaseModel):
@@ -9,6 +9,7 @@ class UserCreate(BaseModel):
 class UserUpdate(BaseModel):
     name: Optional[str] = None
     phone: Optional[str] = None
+    avatar_url: Optional[str] = None
     # Password update could be separate, but simple profile update here
 
 class UserOut(BaseModel):
@@ -19,6 +20,7 @@ class UserOut(BaseModel):
     status: str
     listing_count: int = 0
     phone: Optional[str] = None
+    avatar_url: Optional[str] = None
     created_at: datetime
     class Config:
         from_attributes = True
@@ -33,6 +35,10 @@ class CategoryBase(BaseModel):
 
 class CategoryCreate(CategoryBase):
     pass
+
+class CategoryUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
 
 class CategoryOut(CategoryBase):
     id: int
@@ -50,6 +56,14 @@ class BookBase(BaseModel):
 class BookCreate(BookBase):
     pass
 
+class BookUpdate(BaseModel):
+    title: Optional[str] = None
+    author: Optional[str] = None
+    language: Optional[str] = None
+    isbn: Optional[str] = None
+    description: Optional[str] = None
+    category_id: Optional[int] = None
+
 class BookOut(BookBase):
     id: int
     language: str
@@ -64,13 +78,20 @@ class ListingBase(BaseModel):
     status: str = 'available'
 
 class ListingCreate(ListingBase):
-    pass
+    images: Optional[List[str]] = None
 
 class ListingUpdate(BaseModel):
     price: Optional[float] = None
     condition: Optional[str] = None
     status: Optional[str] = None
     is_active: Optional[bool] = None
+    images: Optional[List[str]] = None
+
+class ListingImageOut(BaseModel):
+    id: int
+    url: str
+    class Config:
+        from_attributes = True
 
 class ListingOut(ListingBase):
     id: int
@@ -78,6 +99,7 @@ class ListingOut(ListingBase):
     sold_at: Optional[datetime] = None
     created_at: datetime
     book: Optional[BookOut] = None
+    images: List[ListingImageOut] = []
     class Config:
         from_attributes = True
 

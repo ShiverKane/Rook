@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign In</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="../assets/js/theme.js"></script>
+    <link rel="stylesheet" href="../assets/css/theme.css" />
+    <link rel="stylesheet" href="../assets/css/pages.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
+  </head>
+  <body class="soft-sage-bg min-h-screen flex items-center justify-center font-body-md text-on-surface">
+    <main class="w-full max-w-[480px] px-margin-page py-stack-lg">
+      <div class="text-center mb-stack-lg">
+        <a class="font-display-lg text-primary mb-2 block" href="./home.html">Curated Sanctuary</a>
+        <p class="font-body-md text-on-surface-variant italic">Restoring the tactile legacy of literature.</p>
+      </div>
+      <div class="bg-surface-container-lowest auth-card rounded-xl overflow-hidden border border-outline-variant/20">
+        <div class="p-8">
+          <h1 class="font-headline-lg text-headline-lg text-on-surface">Sign in</h1>
+          <p class="text-on-surface-variant mt-2">Use your account to manage listings and messages.</p>
+          <form class="mt-stack-md space-y-4" onsubmit="return false;">
+            <div class="space-y-2">
+              <label class="text-label-md text-on-surface-variant" for="email">Email</label>
+              <input class="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg px-4 py-3 focus:ring-1 focus:ring-primary" id="email" name="email" placeholder="you@example.com" type="email" />
+            </div>
+            <div class="space-y-2">
+              <label class="text-label-md text-on-surface-variant" for="password">Password</label>
+              <input class="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg px-4 py-3 focus:ring-1 focus:ring-primary" id="password" name="password" placeholder="••••••••" type="password" />
+            </div>
+            <button class="w-full bg-primary text-on-primary px-6 py-3 rounded-lg font-label-md hover:opacity-90 transition-all" id="signin-submit" type="button">
+              Sign In
+            </button>
+            <div id="signin-status" style="display:none;"></div>
+          </form>
+          <div class="mt-6 flex items-center justify-between text-on-surface-variant text-[12px]">
+            <a class="hover:underline" href="./marketplace.html">Continue as guest</a>
+            <a class="hover:underline" href="#">Forgot password</a>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script type="module" src="../assets/js/pages/signin.js"></script>
+  </body>
+</html>

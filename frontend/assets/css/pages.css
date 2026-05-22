@@ -1,0 +1,11 @@
+.soft-sage-bg {
+  background: linear-gradient(135deg, #f8faf6 0%, #e8f5e9 100%);
+}
+
+.auth-card {
+  box-shadow: 0 20px 40px -15px rgba(13, 99, 27, 0.04);
+}
+
+.reading-list-divider {
+  border-bottom: 1px solid #e8f5e9;
+}

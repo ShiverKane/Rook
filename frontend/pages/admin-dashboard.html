@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="../assets/js/theme.js"></script>
+    <link rel="stylesheet" href="../assets/css/theme.css" />
+    <link rel="stylesheet" href="../assets/css/pages.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
+  </head>
+  <body class="bg-background font-body-md text-on-background antialiased">
+    <header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 shadow-sm">
+      <div class="max-w-container-max mx-auto px-margin-page flex items-center justify-between h-20">
+        <a class="font-display-lg text-headline-md text-primary" href="./home.html">Curated Sanctuary</a>
+        <nav class="hidden md:flex items-center gap-6 font-body-md text-label-md">
+          <a class="text-on-surface-variant hover:text-primary transition-colors" href="./marketplace.html">Marketplace</a>
+          <a class="text-on-surface-variant hover:text-primary transition-colors" href="./sellerdashboard.html">Seller</a>
+          <a class="text-primary font-bold border-b-2 border-primary pb-1" href="./admin-dashboard.html">Admin</a>
+        </nav>
+        <a class="p-2 rounded-full hover:bg-surface-container-low transition-all active:scale-95" href="./profile.html">
+          <span class="material-symbols-outlined text-primary">account_circle</span>
+        </a>
+      </div>
+    </header>
+    <div class="pt-20 flex min-h-screen">
+      <aside class="w-64 fixed left-0 top-20 bottom-0 bg-surface-container-low border-r border-outline-variant/30 overflow-y-auto hidden lg:block">
+        <nav class="p-stack-md flex flex-col gap-2">
+          <a class="flex items-center gap-3 px-4 py-3 bg-primary-container text-on-primary-container rounded-lg transition-all" href="./admin-dashboard.html">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">dashboard</span>
+            <span class="font-label-md text-label-md">Overview</span>
+          </a>
+          <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all" href="#">
+            <span class="material-symbols-outlined">group</span>
+            <span class="font-label-md text-label-md">Users</span>
+          </a>
+          <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all" href="#">
+            <span class="material-symbols-outlined">inventory_2</span>
+            <span class="font-label-md text-label-md">Listings</span>
+          </a>
+          <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all" href="#">
+            <span class="material-symbols-outlined">category</span>
+            <span class="font-label-md text-label-md">Categories</span>
+          </a>
+        </nav>
+        <div class="absolute bottom-8 left-0 right-0 px-stack-md">
+          <div class="bg-tertiary-fixed p-4 rounded-xl flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-secondary overflow-hidden relative flex items-center justify-center" data-avatar data-avatar-name="Admin" data-avatar-url="">
+              <img alt="Avatar" class="w-full h-full object-cover" style="display: none" data-avatar-img />
+              <div class="absolute inset-0 flex items-center justify-center font-bold text-on-secondary text-sm" data-avatar-fallback></div>
+            </div>
+            <div>
+              <p class="font-label-md text-label-md text-on-tertiary-fixed leading-none">Admin</p>
+              <p class="text-[10px] text-on-tertiary-fixed-variant uppercase tracking-wider mt-1 font-bold">Role: admin</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+      <main class="flex-1 lg:ml-64 p-margin-page bg-surface-bright">
+        <header class="mb-stack-lg">
+          <h1 class="font-display-lg text-headline-lg text-on-background">Admin Dashboard</h1>
+          <p class="font-body-md text-body-md text-on-surface-variant mt-2">Manage users, listings, and moderation actions.</p>
+          <div id="admin-status" style="display:none;"></div>
+        </header>
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter mb-stack-lg">
+          <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/30 soft-shadow">
+            <div class="flex items-center justify-between">
+              <span class="material-symbols-outlined text-primary">group</span>
+              <span class="text-[12px] font-bold text-primary bg-primary-fixed/30 px-2 py-1 rounded">Users</span>
+            </div>
+            <div class="mt-4 text-on-surface-variant">Total users</div>
+            <div class="mt-1 font-headline-md text-headline-lg text-on-surface" id="admin-users-count">0</div>
+          </div>
+          <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/30 soft-shadow">
+            <div class="flex items-center justify-between">
+              <span class="material-symbols-outlined text-primary">inventory_2</span>
+              <span class="text-[12px] font-bold text-primary bg-primary-fixed/30 px-2 py-1 rounded">Listings</span>
+            </div>
+            <div class="mt-4 text-on-surface-variant">Active listings</div>
+            <div class="mt-1 font-headline-md text-headline-lg text-on-surface" id="admin-listings-count">0</div>
+          </div>
+          <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/30 soft-shadow">
+            <div class="flex items-center justify-between">
+              <span class="material-symbols-outlined text-primary">block</span>
+              <span class="text-[12px] font-bold text-primary bg-primary-fixed/30 px-2 py-1 rounded">Moderation</span>
+            </div>
+            <div class="mt-4 text-on-surface-variant">Locked users</div>
+            <div class="mt-1 font-headline-md text-headline-lg text-on-surface" id="admin-locked-count">0</div>
+          </div>
+          <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/30 soft-shadow">
+            <div class="flex items-center justify-between">
+              <span class="material-symbols-outlined text-primary">category</span>
+              <span class="text-[12px] font-bold text-primary bg-primary-fixed/30 px-2 py-1 rounded">Catalog</span>
+            </div>
+            <div class="mt-4 text-on-surface-variant">Categories</div>
+            <div class="mt-1 font-headline-md text-headline-lg text-on-surface">12</div>
+          </div>
+        </section>
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
+          <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 soft-shadow overflow-hidden">
+            <div class="p-8 border-b border-outline-variant/30 flex justify-between items-center">
+              <h2 class="font-headline-md text-headline-md text-on-surface">Users</h2>
+              <a class="text-primary font-label-md text-label-md hover:underline" href="#">View all</a>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left">
+                <thead>
+                  <tr class="text-on-surface-variant text-label-md bg-surface-container-low/50">
+                    <th class="px-8 py-4 font-semibold uppercase tracking-wider">Email</th>
+                    <th class="px-8 py-4 font-semibold uppercase tracking-wider">Role</th>
+                    <th class="px-8 py-4 font-semibold uppercase tracking-wider">Status</th>
+                    <th class="px-8 py-4 font-semibold uppercase tracking-wider">Action</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-outline-variant/20" id="admin-users-body"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 soft-shadow overflow-hidden">
+            <div class="p-8 border-b border-outline-variant/30 flex justify-between items-center">
+              <h2 class="font-headline-md text-headline-md text-on-surface">Listings</h2>
+              <a class="text-primary font-label-md text-label-md hover:underline" href="#">View all</a>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left">
+                <thead>
+                  <tr class="text-on-surface-variant text-label-md bg-surface-container-low/50">
+                    <th class="px-8 py-4 font-semibold uppercase tracking-wider">Book</th>
+                    <th class="px-8 py-4 font-semibold uppercase tracking-wider">Seller</th>
+                    <th class="px-8 py-4 font-semibold uppercase tracking-wider">Status</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-outline-variant/20">
+                  <tr class="hover:bg-surface-container-low/30 transition-colors">
+                    <td class="px-8 py-6 text-on-surface text-body-md">Tắt Đèn</td>
+                    <td class="px-8 py-6 text-on-surface-variant text-body-md">Nguyen Van An</td>
+                    <td class="px-8 py-6">
+                      <span class="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-[12px] font-bold">available</span>
+                    </td>
+                  </tr>
+                  <tr class="hover:bg-surface-container-low/30 transition-colors">
+                    <td class="px-8 py-6 text-on-surface text-body-md">Ảnh Hưởng</td>
+                    <td class="px-8 py-6 text-on-surface-variant text-body-md">Tran Thi Mai</td>
+                    <td class="px-8 py-6">
+                      <span class="px-3 py-1 bg-primary-fixed text-on-primary-fixed-variant rounded-full text-[12px] font-bold">sold</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script type="module" src="../assets/js/pages/admin-dashboard.js"></script>
+  </body>
+</html>

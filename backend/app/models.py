@@ -9,6 +9,7 @@ class User(Base):
     email = Column(String(255), unique=True, index=True, nullable=False)
     hashed_password = Column(String(255), nullable=False)
     phone = Column(String(32), unique=True)
+    avatar_url = Column(Text, nullable=True)
     role = Column(String(16), nullable=False, default="user")
     status = Column(String(16), nullable=False, default="active")
     listing_count = Column(Integer, default=0)
@@ -51,9 +52,17 @@ class Listing(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     book = relationship("Book", back_populates="listings")
     seller = relationship("User", back_populates="listings")
+    images = relationship("ListingImage", back_populates="listing", cascade="all, delete-orphan")
     __table_args__ = (
         CheckConstraint("status IN ('available', 'sold')", name="ck_listings_status"),
     )
+
+class ListingImage(Base):
+    __tablename__ = "listing_images"
+    id = Column(Integer, primary_key=True, index=True)
+    listing_id = Column(Integer, ForeignKey("listings.id", ondelete="CASCADE"), nullable=False, index=True)
+    url = Column(Text, nullable=False)
+    listing = relationship("Listing", back_populates="images")
 
 class Message(Base):
     __tablename__ = "messages"

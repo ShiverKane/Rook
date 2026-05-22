@@ -18,6 +18,10 @@ def register(payload: UserCreate, db: Session = Depends(get_db)):
     db.refresh(user)
     return user
 
+@router.post("/signup", response_model=UserOut, status_code=201)
+def signup(payload: UserCreate, db: Session = Depends(get_db)):
+    return register(payload, db)
+
 @router.post("/login", response_model=Token)
 def login(payload: UserCreate, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == payload.email).first()

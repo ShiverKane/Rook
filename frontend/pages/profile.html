@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="../assets/js/theme.js"></script>
+    <link rel="stylesheet" href="../assets/css/theme.css" />
+    <link rel="stylesheet" href="../assets/css/pages.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
+  </head>
+  <body class="bg-background text-on-background font-body-md antialiased">
+    <header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 shadow-sm">
+      <div class="max-w-container-max mx-auto px-margin-page flex items-center justify-between h-20">
+        <a class="font-display-lg text-headline-md text-primary" href="./home.html">Curated Sanctuary</a>
+        <div class="flex items-center gap-4">
+          <a class="p-2 rounded-full hover:bg-surface-container-low transition-all active:scale-95" href="./messages.html">
+            <span class="material-symbols-outlined text-primary">chat</span>
+          </a>
+          <a class="p-2 rounded-full hover:bg-surface-container-low transition-all active:scale-95" href="./marketplace.html">
+            <span class="material-symbols-outlined text-primary">menu_book</span>
+          </a>
+          <a class="p-2 rounded-full hover:bg-surface-container-low transition-all active:scale-95" href="./profile.html">
+            <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1">account_circle</span>
+          </a>
+        </div>
+      </div>
+    </header>
+    <main class="pt-32 pb-stack-lg max-w-container-max mx-auto px-margin-page">
+      <header class="flex flex-col md:flex-row items-center md:items-end gap-gutter mb-stack-lg">
+        <div class="relative group">
+          <div class="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-surface-container shadow-lg relative flex items-center justify-center bg-secondary" data-avatar data-avatar-name="HTLV" data-avatar-url="">
+            <img alt="User Avatar" class="w-full h-full object-cover" style="display: none" data-avatar-img />
+            <div class="absolute inset-0 flex items-center justify-center font-bold text-on-secondary text-5xl" data-avatar-fallback></div>
+          </div>
+        </div>
+        <div class="flex-1 text-center md:text-left space-y-2">
+          <h1 class="font-headline-lg text-headline-lg text-on-surface">HTLV</h1>
+          <p class="text-on-surface-variant font-body-md flex items-center justify-center md:justify-start gap-2">
+            <span class="material-symbols-outlined text-base">calendar_today</span>
+            Member since 2026
+          </p>
+          <div class="flex flex-wrap justify-center md:justify-start gap-2 pt-2">
+            <span class="px-4 py-1 bg-secondary-container text-on-secondary-container rounded-full text-label-md">Seller</span>
+            <span class="px-4 py-1 bg-secondary-container text-on-secondary-container rounded-full text-label-md">Admin</span>
+          </div>
+        </div>
+        <div class="flex gap-3">
+          <a class="px-6 py-2 bg-primary text-on-primary rounded-lg font-label-md hover:opacity-90 transition-opacity active:scale-95" href="./sellerdashboard.html">Dashboard</a>
+          <a class="p-2 border border-outline rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-all active:scale-95" href="./admin-dashboard.html">
+            <span class="material-symbols-outlined">admin_panel_settings</span>
+          </a>
+        </div>
+      </header>
+      <section class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+        <div class="lg:col-span-2 bg-surface-container-lowest border border-outline-variant/20 rounded-xl p-6">
+          <div class="font-headline-md text-headline-md text-on-surface">Profile</div>
+          <div class="mt-6 space-y-4">
+            <div>
+              <label class="text-label-md text-on-surface-variant" for="name">Name</label>
+              <input class="w-full mt-2 bg-surface-container-low border border-outline-variant/20 rounded-lg px-4 py-3 focus:ring-1 focus:ring-primary" id="profile-name" />
+            </div>
+            <div>
+              <label class="text-label-md text-on-surface-variant" for="avatar">Avatar URL (optional)</label>
+              <input class="w-full mt-2 bg-surface-container-low border border-outline-variant/20 rounded-lg px-4 py-3 focus:ring-1 focus:ring-primary" id="profile-avatar" placeholder="https://..." />
+            </div>
+            <button class="bg-primary text-on-primary px-6 py-3 rounded-lg font-label-md hover:opacity-90 transition-all" id="profile-save" type="button">Save</button>
+            <div id="profile-status" style="display:none;"></div>
+          </div>
+        </div>
+        <aside class="bg-surface-container-lowest border border-outline-variant/20 rounded-xl p-6">
+          <div class="font-headline-md text-headline-md text-on-surface">Actions</div>
+          <div class="mt-4 space-y-3">
+            <a class="block px-4 py-3 rounded-xl bg-surface-container-low hover:bg-surface-container-high transition-all" href="./messages.html">Messages</a>
+            <a class="block px-4 py-3 rounded-xl bg-surface-container-low hover:bg-surface-container-high transition-all" href="./managelisting.html">Create Listing</a>
+            <button class="w-full text-left block px-4 py-3 rounded-xl bg-surface-container-low hover:bg-surface-container-high transition-all" id="profile-signout" type="button">Sign out</button>
+          </div>
+        </aside>
+      </section>
+    </main>
+    <script type="module" src="../assets/js/pages/profile.js"></script>
+  </body>
+</html>

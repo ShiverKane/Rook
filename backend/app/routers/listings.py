@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from ..db import get_db
-from ..models import Listing, Book
+from ..models import Listing, Book, ListingImage
 from ..schemas import ListingCreate, ListingOut, ListingUpdate
 from ..deps import get_current_user
 from typing import List
@@ -32,6 +32,8 @@ def create_listing(payload: ListingCreate, db: Session = Depends(get_db), user=D
         is_active=payload.is_active,
         status=payload.status
     )
+    urls = [u.strip() for u in (payload.images or []) if u and u.strip()]
+    listing.images = [ListingImage(url=u) for u in urls]
     db.add(listing)
     db.commit()
     db.refresh(listing)
@@ -70,6 +72,8 @@ def update_listing_full(listing_id: int, payload: ListingCreate, db: Session = D
     listing.is_active = payload.is_active
     listing.status = payload.status
     listing.book_id = payload.book_id # Allow changing book?
+    urls = [u.strip() for u in (payload.images or []) if u and u.strip()]
+    listing.images = [ListingImage(url=u) for u in urls]
     
     db.add(listing)
     db.commit()
@@ -95,9 +99,13 @@ def update_listing_partial(listing_id: int, payload: ListingUpdate, db: Session 
     if not listing:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Listing not found")
     
-    update_data = payload.dict(exclude_unset=True)
+    update_data = payload.model_dump(exclude_unset=True)
+    images = update_data.pop("images", None)
     for key, value in update_data.items():
         setattr(listing, key, value)
+    if images is not None:
+        urls = [u.strip() for u in images if u and u.strip()]
+        listing.images = [ListingImage(url=u) for u in urls]
     
     db.add(listing)
     db.commit()
