@@ -81,7 +81,9 @@ CREATE INDEX IF NOT EXISTS idx_messages_sender ON messages (sender_id);
 CREATE OR REPLACE FUNCTION set_listing_created_at()
 RETURNS TRIGGER AS $$
 BEGIN
-  NEW.created_at = NOW();
+  IF NEW.created_at IS NULL THEN
+    NEW.created_at = NOW();
+  END IF;
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
