@@ -257,7 +257,7 @@ const renderCrud = async (mount) => {
     setStatus(status, "");
     try {
       const user = await me();
-      if (user.role !== "admin") {
+      if (!user || user.role !== "admin") {
         setStatus(status, "Chỉ admin mới dùng được trang CRUD.", "error");
         return;
       }
