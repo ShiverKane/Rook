@@ -22,7 +22,7 @@ const renderUsers = (rows, users) => {
     tr.className = "hover:bg-surface-container-low/30 transition-colors";
     const tdEmail = document.createElement("td");
     tdEmail.className = "px-8 py-6 text-on-surface text-body-md";
-    tdEmail.textContent = u.email;
+    tdEmail.textContent = u.email || u.id || "";
     const tdRole = document.createElement("td");
     tdRole.className = "px-8 py-6 text-on-surface-variant text-body-md";
     tdRole.textContent = u.role;

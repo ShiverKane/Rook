@@ -36,6 +36,17 @@ export const init = async (opts = {}) => {
   if (!requireAuth(navigate)) {
     return;
   }
+  const parseId = (raw) => {
+    const v = String(raw ?? "").trim();
+    if (!v) {
+      return null;
+    }
+    if (/^\d+$/.test(v)) {
+      const n = Number(v);
+      return Number.isFinite(n) ? n : null;
+    }
+    return v;
+  };
   const status = qs("#messages-status");
   const list = qs("#messages-list");
   const listingId = qs("#msg-listing-id");
@@ -68,10 +79,14 @@ export const init = async (opts = {}) => {
       btn.disabled = true;
       try {
         const payload = {
-          listing_id: Number(listingId?.value),
-          receiver_id: Number(receiverId?.value),
+          listing_id: parseId(listingId?.value),
+          receiver_id: parseId(receiverId?.value),
           body: body?.value || ""
         };
+        if (!payload.receiver_id) {
+          setStatus(status, "receiver_id không được trống.", "error");
+          return;
+        }
         await sendMessage(payload);
         const msgs = await getMyMessages();
         if (list) {
