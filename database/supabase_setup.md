@@ -331,7 +331,10 @@ insert into storage.buckets (id, name, public)
 values ('listing-images', 'listing-images', true)
 on conflict (id) do nothing;
 
-alter table storage.objects enable row level security;
+-- NOTE:
+-- Trên Supabase hosted, table storage.objects thường không thuộc owner của role đang chạy SQL Editor,
+-- nên câu lệnh ALTER/POLICY có thể báo lỗi "must be owner of table objects".
+-- Nếu gặp lỗi đó: tạo policies trong Dashboard (Storage -> Policies) thay vì chạy SQL.
 
 drop policy if exists "storage_public_read_listing_images" on storage.objects;
 create policy "storage_public_read_listing_images"

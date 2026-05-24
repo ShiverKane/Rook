@@ -1,4 +1,4 @@
-import { getApiBase, getSupabaseAnon, getSupabaseRefreshToken, setSupabaseRefreshToken, getToken, clearToken, setToken } from "./state.js";
+import { getApiBase, getApiBaseOverride, setApiBaseOverride, getSupabaseAnon, setSupabaseAnon, getSupabaseRefreshToken, setSupabaseRefreshToken, getToken, clearToken, setToken } from "./state.js";
 
 const toJson = async (resp) => {
   const text = await resp.text();
@@ -29,6 +29,41 @@ const toPostgrestError = (data, fallback) => {
     return data;
   }
   return data.message || data.details || data.hint || data.code || fallback;
+};
+
+let configBootPromise = null;
+const ensureSupabaseConfigLoaded = async () => {
+  try {
+    const base = getApiBase();
+    if (isSupabaseRest(base)) {
+      return;
+    }
+    const hasBase = Boolean(getApiBaseOverride());
+    const hasAnon = Boolean(getSupabaseAnon());
+    if (hasBase && hasAnon) {
+      return;
+    }
+    if (configBootPromise) {
+      await configBootPromise;
+      return;
+    }
+    configBootPromise = (async () => {
+      const resp = await fetch("/config", { cache: "no-cache" });
+      if (!resp.ok) {
+        return;
+      }
+      const cfg = await resp.json();
+      if (!hasBase && cfg?.supabase_rest_url) {
+        setApiBaseOverride(String(cfg.supabase_rest_url));
+      }
+      if (!hasAnon && cfg?.supabase_anon_key) {
+        setSupabaseAnon(String(cfg.supabase_anon_key));
+      }
+    })();
+    await configBootPromise;
+  } catch {
+    return;
+  }
 };
 
 const supabaseAuthRequest = async (authPath, options = {}) => {
@@ -99,6 +134,7 @@ const refreshSupabaseSessionIfNeeded = async () => {
 };
 
 export const request = async (path, options = {}) => {
+  await ensureSupabaseConfigLoaded();
   const base = getApiBase();
   const token = getToken();
   const headers = new Headers(options.headers || {});

@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
+import os
 from .db import Base, engine
 from .routers import auth, books, listings, users, categories, messages
 
@@ -86,6 +87,13 @@ def root():
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+@app.get("/config", include_in_schema=False)
+def config():
+    return {
+        "supabase_rest_url": os.getenv("ROOK_SUPABASE_REST_URL") or None,
+        "supabase_anon_key": os.getenv("ROOK_SUPABASE_ANON_KEY") or None,
+    }
 
 app.include_router(auth.router)
 app.include_router(books.router)

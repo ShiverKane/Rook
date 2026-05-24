@@ -1,4 +1,4 @@
-import { listListings } from "../api.js";
+import { listCategories, listBooks, listListings } from "../api.js";
 import { qs, setText, fmtVnd } from "../ui.js";
 
 const render = (items, navigate) => {
@@ -63,9 +63,50 @@ const render = (items, navigate) => {
 export const init = async (opts = {}) => {
   const navigate = typeof opts.navigate === "function" ? opts.navigate : null;
   const status = qs("#marketplace-status");
+  const categorySelect = qs("#marketplace-category");
   try {
-    const data = await listListings();
-    render(data || [], navigate);
+    const [categories, books, listings] = await Promise.all([listCategories(), listBooks(), listListings()]);
+    const bookById = new Map((books || []).map((b) => [b.id, b]));
+
+    if (categorySelect) {
+      const current = categorySelect.value;
+      categorySelect.innerHTML = `<option value="">All</option>`;
+      for (const c of categories || []) {
+        const opt = document.createElement("option");
+        opt.value = `${c.id}`;
+        opt.textContent = c.name || `${c.id}`;
+        categorySelect.appendChild(opt);
+      }
+      if (current) {
+        categorySelect.value = current;
+      }
+    }
+
+    const getCategoryId = (listing) => {
+      const fromJoin = listing?.book?.category_id ?? listing?.book?.category?.id ?? null;
+      if (fromJoin != null) {
+        return Number(fromJoin);
+      }
+      const b = bookById.get(listing?.book_id);
+      if (b?.category_id != null) {
+        return Number(b.category_id);
+      }
+      return null;
+    };
+
+    const filterAndRender = () => {
+      const selected = categorySelect?.value ? Number(categorySelect.value) : null;
+      const data = (listings || []).filter((l) => {
+        if (!selected) {
+          return true;
+        }
+        return getCategoryId(l) === selected;
+      });
+      render(data, navigate);
+    };
+
+    categorySelect?.addEventListener("change", () => filterAndRender());
+    filterAndRender();
     if (status) {
       status.style.display = "none";
     }

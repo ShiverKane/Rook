@@ -1,6 +1,29 @@
-import { clearToken, getToken } from "./state.js";
+import { clearToken, getApiBaseOverride, getSupabaseAnon, getToken, setApiBaseOverride, setSupabaseAnon } from "./state.js";
 import { me, listBooks, createBook, updateBook, deleteBook, listCategories, createCategory, updateCategory, deleteCategory } from "./api.js";
 import { qs, setStatus, setText } from "./ui.js";
+
+const bootstrapConfig = async () => {
+  try {
+    const hasBase = Boolean(getApiBaseOverride());
+    const hasAnon = Boolean(getSupabaseAnon());
+    if (hasBase && hasAnon) {
+      return;
+    }
+    const resp = await fetch("/config", { cache: "no-cache" });
+    if (!resp.ok) {
+      return;
+    }
+    const cfg = await resp.json();
+    if (!hasBase && cfg?.supabase_rest_url) {
+      setApiBaseOverride(String(cfg.supabase_rest_url));
+    }
+    if (!hasAnon && cfg?.supabase_anon_key) {
+      setSupabaseAnon(String(cfg.supabase_anon_key));
+    }
+  } catch {
+    return;
+  }
+};
 
 const normalizeRoute = (hash) => {
   const raw = (hash || "").replace(/^#/, "").trim();
@@ -536,7 +559,7 @@ const start = () => {
       navigate(target);
     });
   }
-  void handleRoute();
+  void bootstrapConfig().finally(() => void handleRoute());
 };
 
 start();
