@@ -1,4 +1,4 @@
-import { adminUsers, adminLockedUsers, lockUser, unlockUser, listListings } from "../api.js";
+import { me, adminUsers, adminLockedUsers, lockUser, unlockUser, listListings } from "../api.js";
 import { getToken, clearToken } from "../state.js";
 import { initAvatars } from "../app.js";
 import { qs, setText, setStatus } from "../ui.js";
@@ -77,6 +77,11 @@ export const init = async (opts = {}) => {
 
   setStatus(status, "");
   try {
+    const user = await me();
+    if (!user || user.role !== "admin") {
+      setStatus(status, "Bạn không có quyền truy cập trang này.", "error");
+      return;
+    }
     const [users, locked, listings] = await Promise.all([adminUsers(), adminLockedUsers(), listListings()]);
     setText(usersCount, `${(users || []).length}`);
     setText(lockedCount, `${(locked || []).length}`);

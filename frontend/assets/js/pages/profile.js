@@ -21,6 +21,9 @@ export const init = async (opts = {}) => {
     return;
   }
   const status = qs("#profile-status");
+  const title = qs("#profile-title");
+  const memberSince = qs("#profile-member-since");
+  const badges = qs("#profile-badges");
   const nameInput = qs("#profile-name");
   const avatarInput = qs("#profile-avatar");
   const saveBtn = qs("#profile-save");
@@ -30,6 +33,32 @@ export const init = async (opts = {}) => {
   setStatus(status, "");
   try {
     const user = await me();
+    if (title) {
+      title.textContent = user.name || user.email || "Profile";
+    }
+    if (memberSince) {
+      const year = user.created_at ? new Date(user.created_at).getFullYear() : null;
+      memberSince.innerHTML = `<span class="material-symbols-outlined text-base">calendar_today</span> Member since ${year || "—"}`;
+    }
+    if (badges) {
+      badges.innerHTML = "";
+      const mk = (text) => {
+        const s = document.createElement("span");
+        s.className = "px-4 py-1 bg-secondary-container text-on-secondary-container rounded-full text-label-md";
+        s.textContent = text;
+        return s;
+      };
+      if ((user.listing_count || 0) > 0) {
+        badges.appendChild(mk("Seller"));
+      }
+      badges.appendChild(mk(user.role === "admin" ? "Admin" : "User"));
+      if (user.status === "banned") {
+        const s = document.createElement("span");
+        s.className = "px-4 py-1 bg-error-container text-on-error-container rounded-full text-label-md";
+        s.textContent = "Banned";
+        badges.appendChild(s);
+      }
+    }
     if (nameInput) {
       nameInput.value = user.name || "";
     }

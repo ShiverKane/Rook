@@ -41,8 +41,7 @@
         </div>
         <div class="flex-1 overflow-y-auto">
           <div class="p-6 text-on-surface-variant text-[12px]">
-            Trang này đang hiển thị toàn bộ tin nhắn của bạn từ <span class="font-bold">/messages/me</span>.
-            Để gửi tin: nhập <span class="font-bold">listing_id</span> và <span class="font-bold">receiver_id</span> ở khung bên phải.
+            Nhắn tin với người bán/người mua. Khi bạn bấm “Message” ở Marketplace, form sẽ tự điền người nhận.
           </div>
         </div>
       </aside>
@@ -52,7 +51,7 @@
             <div class="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-on-secondary font-bold">M</div>
             <div>
               <div class="font-headline-md text-headline-md">My Messages</div>
-              <div class="text-on-surface-variant text-[12px]">/messages/me</div>
+              <div class="text-on-surface-variant text-[12px]">Inbox</div>
             </div>
           </div>
           <button class="p-2 rounded-full hover:bg-surface-container-low transition-all active:scale-95">
@@ -63,8 +62,8 @@
         <div id="messages-list" class="flex-1 overflow-y-auto p-6 space-y-4"></div>
         <div class="p-6 border-t border-outline-variant/30">
           <form class="grid grid-cols-1 md:grid-cols-7 gap-3 items-center" onsubmit="return false;">
-            <input class="md:col-span-1 bg-surface-container-low border border-outline-variant/20 rounded-lg px-4 py-3 focus:ring-1 focus:ring-primary" id="msg-listing-id" placeholder="listing_id" type="number" />
-            <input class="md:col-span-1 bg-surface-container-low border border-outline-variant/20 rounded-lg px-4 py-3 focus:ring-1 focus:ring-primary" id="msg-receiver-id" placeholder="receiver_id" type="text" />
+            <input class="md:col-span-1 bg-surface-container-low border border-outline-variant/20 rounded-lg px-4 py-3 focus:ring-1 focus:ring-primary" id="msg-listing-id" placeholder="Listing (optional)" type="number" />
+            <input class="md:col-span-1 bg-surface-container-low border border-outline-variant/20 rounded-lg px-4 py-3 focus:ring-1 focus:ring-primary" id="msg-receiver-id" placeholder="To (User ID)" type="text" />
             <input class="md:col-span-4 bg-surface-container-low border border-outline-variant/20 rounded-lg px-4 py-3 focus:ring-1 focus:ring-primary" id="msg-body" placeholder="Write a message..." type="text" />
             <button class="md:col-span-1 bg-primary text-on-primary px-4 py-3 rounded-lg font-label-md hover:opacity-90 transition-all" id="msg-send" type="button">
               Send

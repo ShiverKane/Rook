@@ -357,3 +357,116 @@ update public.profiles
 set role = 'admin'
 where id = '<USER_UUID>';
 ```
+
+## Mock data (Supabase)
+Vì `public.profiles.id` có FK sang `auth.users(id)`, nên mock users cần được tạo bằng Supabase Auth (UI) trước. Sau đó dùng UUID của các user đó để seed listings/messages.
+
+### Bước 1: tạo 2 users trong Supabase Auth
+- Tạo 2 user (ví dụ: seller1@example.com, seller2@example.com)
+- Copy UUID của họ (Auth → Users → chọn user → “User UID”)
+- (Tuỳ chọn) cập nhật tên hiển thị:
+```sql
+update public.profiles set name = 'Seller 1' where id = '<SELLER_1_UUID>';
+update public.profiles set name = 'Seller 2' where id = '<SELLER_2_UUID>';
+```
+
+### Bước 2: seed categories + books + listings + images + messages
+Chạy SQL dưới đây trong Supabase SQL Editor. Nhớ thay `<SELLER_1_UUID>` và `<SELLER_2_UUID>` bằng UUID thật.
+
+```sql
+-- OPTIONAL: reset dữ liệu demo (cẩn thận khi dùng)
+-- truncate table public.messages, public.listing_images, public.listings, public.books, public.categories restart identity cascade;
+
+-- Categories
+insert into public.categories (name, description) values
+  ('Văn học Việt Nam', 'Sách văn học, tiểu thuyết, truyện ngắn của tác giả Việt Nam'),
+  ('Văn học nước ngoài', 'Tác phẩm văn học dịch từ các nước trên thế giới'),
+  ('Kinh tế - Kinh doanh', 'Sách về quản trị, khởi nghiệp, đầu tư, tài chính'),
+  ('Kỹ năng sống', 'Sách phát triển bản thân, kỹ năng mềm'),
+  ('Khoa học - Công nghệ', 'Sách về khoa học, công nghệ thông tin, AI'),
+  ('Tâm lý học', 'Sách về tâm lý, hành vi con người'),
+  ('Lịch sử', 'Sách về lịch sử thế giới và Việt Nam'),
+  ('Văn hóa - Xã hội', 'Nghiên cứu văn hóa, xã hội học'),
+  ('Thiếu nhi', 'Sách, truyện tranh cho trẻ em'),
+  ('Giáo khoa - Tham khảo', 'Sách giáo khoa, sách bài tập, tham khảo'),
+  ('Ngoại ngữ', 'Sách học tiếng Anh, tiếng Trung, tiếng Nhật'),
+  ('Nấu ăn - Ẩm thực', 'Sách dạy nấu ăn, công thức, văn hóa ẩm thực')
+on conflict (name) do update set description = excluded.description;
+
+-- Books (upsert theo isbn)
+insert into public.books (title, author, category_id, language, isbn, description) values
+  ('Tắt Đèn', 'Ngô Tất Tố', (select id from public.categories where name='Văn học Việt Nam'), 'vi', '9786041234561', 'Tiểu thuyết kinh điển về người nông dân Việt Nam trước Cách mạng'),
+  ('Số Đỏ', 'Vũ Trọng Phụng', (select id from public.categories where name='Văn học Việt Nam'), 'vi', '9786041234562', 'Tác phẩm trào phúng nổi tiếng của văn học Việt Nam'),
+  ('Nhà Giả Kim', 'Paulo Coelho', (select id from public.categories where name='Văn học nước ngoài'), 'vi', '9786041234564', 'Tiểu thuyết nổi tiếng về hành trình tìm kiếm giấc mơ'),
+  ('1984', 'George Orwell', (select id from public.categories where name='Văn học nước ngoài'), 'vi', '9786041234566', 'Tiểu thuyết phản địa đàng kinh điển'),
+  ('Cha Giàu Cha Nghèo', 'Robert Kiyosaki', (select id from public.categories where name='Kinh tế - Kinh doanh'), 'vi', '9786041234567', 'Sách dạy về tư duy tài chính'),
+  ('Đắc Nhân Tâm', 'Dale Carnegie', (select id from public.categories where name='Kỹ năng sống'), 'vi', '9786041234570', 'Nghệ thuật ứng xử và giao tiếp'),
+  ('Lược Sử Thời Gian', 'Stephen Hawking', (select id from public.categories where name='Khoa học - Công nghệ'), 'vi', '9786041234573', 'Khám phá vũ trụ và thời gian'),
+  ('Ảnh Hưởng', 'Robert Cialdini', (select id from public.categories where name='Tâm lý học'), 'vi', '9786041234577', 'Tâm lý học thuyết phục'),
+  ('Súng, Vi Trùng Và Thép', 'Jared Diamond', (select id from public.categories where name='Lịch sử'), 'vi', '9786041234580', 'Lịch sử văn minh nhân loại'),
+  ('Dế Mèn Phiêu Lưu Ký', 'Tô Hoài', (select id from public.categories where name='Thiếu nhi'), 'vi', '9786041234584', 'Tác phẩm kinh điển cho thiếu nhi'),
+  ('English Grammar In Use', 'Raymond Murphy', (select id from public.categories where name='Ngoại ngữ'), 'en', '9786041234590', 'Ngữ pháp tiếng Anh thực hành'),
+  ('Món Ngon Việt Nam', 'Triệu Thị Chơi', (select id from public.categories where name='Nấu ăn - Ẩm thực'), 'vi', '9786041234593', 'Ẩm thực truyền thống Việt')
+on conflict (isbn) do update set
+  title = excluded.title,
+  author = excluded.author,
+  category_id = excluded.category_id,
+  language = excluded.language,
+  description = excluded.description;
+
+-- Listings + images (nhớ thay UUID)
+with
+  l1 as (
+    insert into public.listings (book_id, seller_id, price, condition, status, is_active, created_at)
+    values ((select id from public.books where isbn='9786041234561'), '<SELLER_1_UUID>', 45000.00, 'Như mới', 'available', true, '2026-03-04 09:30:00+07')
+    returning id
+  ),
+  l2 as (
+    insert into public.listings (book_id, seller_id, price, condition, status, is_active, created_at)
+    values ((select id from public.books where isbn='9786041234564'), '<SELLER_2_UUID>', 65000.00, 'Tốt', 'available', true, '2026-03-07 16:45:00+07')
+    returning id
+  ),
+  l3 as (
+    insert into public.listings (book_id, seller_id, price, condition, status, is_active, created_at)
+    values ((select id from public.books where isbn='9786041234567'), '<SELLER_1_UUID>', 70000.00, 'Tốt', 'available', true, '2026-03-08 10:30:00+07')
+    returning id
+  ),
+  l4 as (
+    insert into public.listings (book_id, seller_id, price, condition, status, is_active, created_at)
+    values ((select id from public.books where isbn='9786041234573'), '<SELLER_2_UUID>', 85000.00, 'Như mới', 'available', true, '2026-03-10 08:15:00+07')
+    returning id
+  )
+insert into public.listing_images (listing_id, url)
+select l1.id, 'https://picsum.photos/seed/rook-1/600/800' from l1
+union all select l2.id, 'https://picsum.photos/seed/rook-2/600/800' from l2
+union all select l3.id, 'https://picsum.photos/seed/rook-3/600/800' from l3
+union all select l4.id, 'https://picsum.photos/seed/rook-4/600/800' from l4;
+
+-- Messages (demo thread giữa 2 sellers)
+insert into public.messages (listing_id, sender_id, receiver_id, body, is_read, created_at)
+values
+  (
+    (select l.id from public.listings l join public.books b on b.id = l.book_id where b.isbn='9786041234561' and l.seller_id = '<SELLER_1_UUID>' order by l.id desc limit 1),
+    '<SELLER_2_UUID>',
+    '<SELLER_1_UUID>',
+    'Sách còn không bạn?',
+    true,
+    '2026-03-05 10:30:00+07'
+  ),
+  (
+    (select l.id from public.listings l join public.books b on b.id = l.book_id where b.isbn='9786041234561' and l.seller_id = '<SELLER_1_UUID>' order by l.id desc limit 1),
+    '<SELLER_1_UUID>',
+    '<SELLER_2_UUID>',
+    'Còn ạ, bạn muốn xem thêm ảnh không?',
+    false,
+    '2026-03-05 14:20:00+07'
+  );
+```
+
+### Kiểm tra nhanh
+```sql
+select count(*) as categories from public.categories;
+select count(*) as books from public.books;
+select count(*) as listings from public.listings;
+select count(*) as images from public.listing_images;
+```

@@ -23,6 +23,7 @@ export const init = async (opts = {}) => {
   const status = qs("#seller-status");
   const userName = qs("#seller-name");
   const avatar = qs("#seller-avatar");
+  const totalCount = qs("#seller-total-count");
   const activeCount = qs("#seller-active-count");
   const listingsBox = qs("#seller-listings");
 
@@ -36,6 +37,9 @@ export const init = async (opts = {}) => {
       initAvatars();
     }
     const listings = await myListings();
+    if (totalCount) {
+      setText(totalCount, `${(listings || []).length}`);
+    }
     const active = (listings || []).filter((l) => l.is_active).length;
     setText(activeCount, `${active}`);
     if (listingsBox) {

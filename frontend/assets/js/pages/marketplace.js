@@ -43,10 +43,28 @@ const render = (items, navigate) => {
       link.href = "#/messages";
       link.addEventListener("click", (ev) => {
         ev.preventDefault();
+        try {
+          if (it?.seller_id) {
+            localStorage.setItem("rook_msg_to", String(it.seller_id));
+          }
+          if (it?.id != null) {
+            localStorage.setItem("rook_msg_listing", String(it.id));
+          }
+        } catch {}
         navigate("/messages");
       });
     } else {
       link.href = "./messages.html";
+      link.addEventListener("click", () => {
+        try {
+          if (it?.seller_id) {
+            localStorage.setItem("rook_msg_to", String(it.seller_id));
+          }
+          if (it?.id != null) {
+            localStorage.setItem("rook_msg_listing", String(it.id));
+          }
+        } catch {}
+      });
     }
     link.textContent = "Message";
     row.appendChild(price);
