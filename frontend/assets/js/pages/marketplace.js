@@ -82,6 +82,8 @@ export const init = async (opts = {}) => {
   const navigate = typeof opts.navigate === "function" ? opts.navigate : null;
   const status = qs("#marketplace-status");
   const categorySelect = qs("#marketplace-category");
+  const minInput = qs("#marketplace-price-min");
+  const maxInput = qs("#marketplace-price-max");
   try {
     const [categories, books, listings] = await Promise.all([listCategories(), listBooks(), listListings()]);
     const bookById = new Map((books || []).map((b) => [b.id, b]));
@@ -112,9 +114,32 @@ export const init = async (opts = {}) => {
       return null;
     };
 
+    const parsePrice = (value) => {
+      const raw = String(value ?? "").trim();
+      if (!raw) {
+        return null;
+      }
+      const n = Number(raw);
+      return Number.isFinite(n) ? n : null;
+    };
+
+    const listingPrice = (l) => {
+      const n = Number(l?.price);
+      return Number.isFinite(n) ? n : 0;
+    };
+
     const filterAndRender = () => {
       const selected = categorySelect?.value ? Number(categorySelect.value) : null;
+      const min = parsePrice(minInput?.value);
+      const max = parsePrice(maxInput?.value);
       const data = (listings || []).filter((l) => {
+        const p = listingPrice(l);
+        if (min != null && p < min) {
+          return false;
+        }
+        if (max != null && p > max) {
+          return false;
+        }
         if (!selected) {
           return true;
         }
@@ -124,6 +149,8 @@ export const init = async (opts = {}) => {
     };
 
     categorySelect?.addEventListener("change", () => filterAndRender());
+    minInput?.addEventListener("input", () => filterAndRender());
+    maxInput?.addEventListener("input", () => filterAndRender());
     filterAndRender();
     if (status) {
       status.style.display = "none";
