@@ -32,6 +32,8 @@ class Token(BaseModel):
 class CategoryBase(BaseModel):
     name: str
     description: Optional[str] = None
+    is_approved: Optional[bool] = None
+    created_by: Optional[int] = None
 
 class CategoryCreate(CategoryBase):
     pass
@@ -52,6 +54,8 @@ class BookBase(BaseModel):
     isbn: Optional[str] = None
     description: Optional[str] = None
     category_id: Optional[int] = None
+    is_approved: Optional[bool] = None
+    created_by: Optional[int] = None
 
 class BookCreate(BookBase):
     pass
@@ -67,6 +71,7 @@ class BookUpdate(BaseModel):
 class BookOut(BookBase):
     id: int
     language: str
+    is_approved: bool
     class Config:
         from_attributes = True
 

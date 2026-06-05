@@ -22,6 +22,7 @@ end$$;
 -- Profiles (mirror of auth.users)
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
+  email text,
   name text,
   avatar_url text,
   role public.user_role not null default 'user',
@@ -30,12 +31,39 @@ create table if not exists public.profiles (
   created_at timestamptz not null default now()
 );
 
+alter table public.profiles add column if not exists email text;
+
+update public.profiles p
+set email = u.email
+from auth.users u
+where p.id = u.id
+  and p.email is null;
+
+create or replace function public.get_profile_summaries(user_ids uuid[])
+returns table (id uuid, name text, avatar_url text)
+language sql
+security definer
+set search_path = public
+as $$
+  select p.id, p.name, p.avatar_url
+  from public.profiles p
+  where p.id = any(user_ids)
+    and p.status <> 'banned'
+$$;
+
+grant execute on function public.get_profile_summaries(uuid[]) to authenticated;
+
 -- Catalog
 create table if not exists public.categories (
   id bigint generated always as identity primary key,
   name text not null unique,
-  description text
+  description text,
+  is_approved boolean not null default true,
+  created_by uuid references public.profiles(id) on delete set null
 );
+
+alter table public.categories add column if not exists is_approved boolean not null default true;
+alter table public.categories add column if not exists created_by uuid references public.profiles(id) on delete set null;
 
 create table if not exists public.books (
   id bigint generated always as identity primary key,
@@ -44,8 +72,13 @@ create table if not exists public.books (
   language text not null default 'und',
   isbn text unique,
   description text,
-  category_id bigint references public.categories(id) on delete set null
+  category_id bigint references public.categories(id) on delete set null,
+  is_approved boolean not null default true,
+  created_by uuid references public.profiles(id) on delete set null
 );
+
+alter table public.books add column if not exists is_approved boolean not null default true;
+alter table public.books add column if not exists created_by uuid references public.profiles(id) on delete set null;
 
 -- Listings
 create table if not exists public.listings (
@@ -91,6 +124,8 @@ create or replace function public.is_admin()
 returns boolean
 language sql
 stable
+security definer
+set search_path = public
 as $$
   select exists (
     select 1
@@ -105,6 +140,8 @@ create or replace function public.is_not_banned()
 returns boolean
 language sql
 stable
+security definer
+set search_path = public
 as $$
   select coalesce(
     (select p.status <> 'banned' from public.profiles p where p.id = auth.uid()),
@@ -120,8 +157,8 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.profiles (id, name)
-  values (new.id, coalesce(new.raw_user_meta_data->>'name', null))
+  insert into public.profiles (id, email, name)
+  values (new.id, new.email, coalesce(new.raw_user_meta_data->>'name', null))
   on conflict (id) do nothing;
   return new;
 end;
@@ -219,7 +256,13 @@ drop policy if exists "categories_public_read" on public.categories;
 create policy "categories_public_read"
 on public.categories
 for select
-using (true);
+using (is_approved = true or created_by = auth.uid() or public.is_admin());
+
+drop policy if exists "categories_user_insert_pending" on public.categories;
+create policy "categories_user_insert_pending"
+on public.categories
+for insert
+with check (auth.uid() is not null and public.is_not_banned() and is_approved = false and created_by = auth.uid());
 
 drop policy if exists "categories_admin_write" on public.categories;
 create policy "categories_admin_write"
@@ -232,7 +275,13 @@ drop policy if exists "books_public_read" on public.books;
 create policy "books_public_read"
 on public.books
 for select
-using (true);
+using (is_approved = true or created_by = auth.uid() or public.is_admin());
+
+drop policy if exists "books_user_insert_pending" on public.books;
+create policy "books_user_insert_pending"
+on public.books
+for insert
+with check (auth.uid() is not null and public.is_not_banned() and is_approved = false and created_by = auth.uid());
 
 drop policy if exists "books_admin_write" on public.books;
 create policy "books_admin_write"

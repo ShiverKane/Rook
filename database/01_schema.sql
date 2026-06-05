@@ -33,12 +33,16 @@ CREATE TABLE IF NOT EXISTS books (
   category_id BIGINT REFERENCES categories(id) ON DELETE SET NULL,
   language VARCHAR(16) NOT NULL DEFAULT 'und',
   isbn VARCHAR(32) UNIQUE,
-  description TEXT
+  description TEXT,
+  is_approved BOOLEAN NOT NULL DEFAULT TRUE
 );
 
 CREATE INDEX IF NOT EXISTS idx_books_title ON books (title);
 CREATE INDEX IF NOT EXISTS idx_books_author ON books (author);
 CREATE INDEX IF NOT EXISTS idx_books_category_id ON books (category_id);
+
+-- Backfill/migration: approval flag for existing DBs
+ALTER TABLE books ADD COLUMN IF NOT EXISTS is_approved BOOLEAN NOT NULL DEFAULT TRUE;
 
 -- Listings: tin đăng bán sách. FK book_id->books, seller_id->users. 1-n messages.
 CREATE TABLE IF NOT EXISTS listings (

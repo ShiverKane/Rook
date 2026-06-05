@@ -20,6 +20,26 @@ const joinUrl = (base, path) => {
 
 const isSupabaseRest = (base) => /supabase\.co\/rest\/v1\/?$/i.test((base || "").replace(/\/+$/, "/"));
 const toSupabaseAuthBase = (restBase) => (restBase || "").replace(/\/rest\/v1\/?$/i, "/auth/v1/");
+const toSupabaseStorageBase = (restBase) => (restBase || "").replace(/\/rest\/v1\/?$/i, "/storage/v1/");
+const normalizeSupabaseRestBase = (maybeBase) => {
+  const b = String(maybeBase || "").trim().replace(/\/+$/, "");
+  if (!b) {
+    return b;
+  }
+  if (!/supabase\.co/i.test(b)) {
+    return b;
+  }
+  if (/\/rest\/v1$/i.test(b)) {
+    return b;
+  }
+  if (/\/rest\/v1\//i.test(`${b}/`)) {
+    return b.replace(/\/+$/, "");
+  }
+  if (/\/auth\/v1$/i.test(b) || /\/auth\/v1\//i.test(`${b}/`)) {
+    return b.replace(/\/auth\/v1\/?$/i, "/rest/v1");
+  }
+  return `${b}/rest/v1`;
+};
 
 const toPostgrestError = (data, fallback) => {
   if (!data) {
@@ -34,13 +54,22 @@ const toPostgrestError = (data, fallback) => {
 let configBootPromise = null;
 const ensureSupabaseConfigLoaded = async () => {
   try {
+    const currentOverride = getApiBaseOverride();
+    if (currentOverride) {
+      const normalized = normalizeSupabaseRestBase(currentOverride);
+      if (normalized && normalized !== currentOverride) {
+        setApiBaseOverride(normalized);
+      }
+    }
     const base = getApiBase();
     if (isSupabaseRest(base)) {
       return;
     }
-    const hasBase = Boolean(getApiBaseOverride());
+    const override = getApiBaseOverride();
+    const hasBase = Boolean(override);
     const hasAnon = Boolean(getSupabaseAnon());
-    if (hasBase && hasAnon) {
+    const overrideLooksSupabase = /supabase\.co/i.test(override || "");
+    if (hasBase && hasAnon && !overrideLooksSupabase) {
       return;
     }
     if (configBootPromise) {
@@ -53,8 +82,13 @@ const ensureSupabaseConfigLoaded = async () => {
         return;
       }
       const cfg = await resp.json();
-      if (!hasBase && cfg?.supabase_rest_url) {
-        setApiBaseOverride(String(cfg.supabase_rest_url));
+      if (cfg?.supabase_rest_url) {
+        const cfgBase = normalizeSupabaseRestBase(String(cfg.supabase_rest_url));
+        if (!hasBase || (overrideLooksSupabase && !isSupabaseRest(override))) {
+          if (cfgBase) {
+            setApiBaseOverride(cfgBase);
+          }
+        }
       }
       if (!hasAnon && cfg?.supabase_anon_key) {
         setSupabaseAnon(String(cfg.supabase_anon_key));
@@ -96,6 +130,64 @@ const supabaseAuthRequest = async (authPath, options = {}) => {
     throw err;
   }
   return data;
+};
+
+const supabaseStorageUpload = async (bucket, objectPath, file, opts = {}) => {
+  const base = getApiBase();
+  const anon = getSupabaseAnon();
+  if (!anon) {
+    throw new Error("Thiếu Supabase anon key (rook_supabase_anon).");
+  }
+  const storageBase = toSupabaseStorageBase(base);
+  const url = joinUrl(storageBase, `object/${bucket}/${objectPath}`);
+  const headers = new Headers(opts.headers || {});
+  headers.set("apikey", anon);
+  const token = getToken();
+  if (token) {
+    headers.set("authorization", `Bearer ${token}`);
+  } else {
+    headers.set("authorization", `Bearer ${anon}`);
+  }
+  headers.set("x-upsert", "true");
+  if (file?.type) {
+    headers.set("content-type", file.type);
+  }
+  const resp = await fetch(url, { method: "POST", headers, body: file });
+  const data = await toJson(resp);
+  if (!resp.ok) {
+    const msg = toPostgrestError(data, resp.statusText);
+    const err = new Error(msg);
+    err.status = resp.status;
+    err.data = data;
+    throw err;
+  }
+  return data;
+};
+
+export const uploadListingImages = async (files, opts = {}) => {
+  await ensureSupabaseConfigLoaded();
+  const base = getApiBase();
+  if (!isSupabaseRest(base)) {
+    throw new Error("Upload ảnh hiện chỉ hỗ trợ khi chạy Supabase.");
+  }
+  const inputFiles = Array.from(files || []).filter(Boolean);
+  if (!inputFiles.length) {
+    return [];
+  }
+  const bucket = opts.bucket || "listing-images";
+  const authUser = await supabaseGetUser();
+  const uid = authUser?.id || "anon";
+  const storageBase = toSupabaseStorageBase(base).replace(/\/+$/, "");
+  const now = Date.now();
+  const urls = [];
+  for (const f of inputFiles) {
+    const safeName = String(f.name || "image").replace(/[^a-zA-Z0-9._-]+/g, "_");
+    const rand = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `${Math.random()}`.slice(2);
+    const objectPath = `listings/${uid}/${now}-${rand}-${safeName}`;
+    await supabaseStorageUpload(bucket, objectPath, f);
+    urls.push(`${storageBase}/object/public/${bucket}/${objectPath}`);
+  }
+  return urls;
 };
 
 const supabaseGetUser = async () => {
@@ -183,6 +275,7 @@ export const request = async (path, options = {}) => {
 };
 
 export const login = async (email, password) => {
+  await ensureSupabaseConfigLoaded();
   const base = getApiBase();
   if (isSupabaseRest(base)) {
     const data = await supabaseAuthRequest("token?grant_type=password", {
@@ -202,6 +295,7 @@ export const login = async (email, password) => {
 };
 
 export const signup = async (email, password) => {
+  await ensureSupabaseConfigLoaded();
   const base = getApiBase();
   if (isSupabaseRest(base)) {
     const data = await supabaseAuthRequest("signup", {
@@ -258,10 +352,31 @@ export const updateMe = async (payload) => {
   });
 };
 
-export const listBooks = async () => {
+export const getProfileSummaries = async (userIds = []) => {
+  const ids = Array.from(new Set((userIds || []).map((v) => (v == null ? "" : String(v))).filter(Boolean)));
+  if (!ids.length) {
+    return [];
+  }
+
   const base = getApiBase();
   if (isSupabaseRest(base)) {
-    return request("books?select=*&order=id.desc", { method: "GET" });
+    return request("rpc/get_profile_summaries", { method: "POST", body: JSON.stringify({ user_ids: ids }) });
+  }
+
+  const results = await Promise.allSettled(ids.map((id) => request(`/users/${encodeURIComponent(id)}`, { method: "GET" })));
+  return results.filter((r) => r.status === "fulfilled").map((r) => r.value);
+};
+
+export const listBooks = async (opts = {}) => {
+  const base = getApiBase();
+  const includeUnapproved = opts?.includeUnapproved === true;
+  if (isSupabaseRest(base)) {
+    const filter = includeUnapproved ? "" : "is_approved=eq.true&";
+    return request(`books?select=*&${filter}order=id.desc`, { method: "GET" });
+  }
+  if (includeUnapproved) {
+    const [approved, pending] = await Promise.all([request("/books", { method: "GET" }), request("/books/admin/pending", { method: "GET" })]);
+    return [...(pending || []), ...(approved || [])];
   }
   return request("/books", { method: "GET" });
 };
@@ -278,14 +393,61 @@ export const getBook = async (bookId) => {
 export const createBook = async (payload) => {
   const base = getApiBase();
   if (isSupabaseRest(base)) {
-    const rows = await request("books", { method: "POST", body: JSON.stringify(payload) });
-    return Array.isArray(rows) ? rows[0] || null : rows;
+    let authUser = null;
+    try {
+      authUser = await supabaseGetUser();
+    } catch (e) {
+      if (e?.status === 401) {
+        clearToken();
+        throw new Error("Phiên đăng nhập Supabase không hợp lệ. Vui lòng Sign out và Sign in lại.");
+      }
+      throw e;
+    }
+    const uid = authUser?.id || null;
+    if (!uid) {
+      throw new Error("Bạn cần đăng nhập Supabase trước khi đăng ký sách.");
+    }
+
+    let body = { ...(payload || {}) };
+    if (body.is_approved === false && body.created_by == null) {
+      body.created_by = uid;
+    }
+
+    const rows = await request("books", { method: "POST", body: JSON.stringify(body) });
+    const created = Array.isArray(rows) ? rows[0] || null : rows;
+    if (created?.id) {
+      return created;
+    }
+
+    const fallback = await request(`books?select=*&created_by=eq.${uid}&order=id.desc&limit=1`, { method: "GET" });
+    const last = Array.isArray(fallback) ? fallback[0] || null : fallback;
+    if (last?.id) {
+      return last;
+    }
+    throw new Error("Tạo sách thất bại. Vui lòng kiểm tra Supabase schema/policies (books.created_by + RLS).");
   }
   return request("/books", {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(payload)
   });
+};
+
+export const listPendingBooks = async () => {
+  const base = getApiBase();
+  if (isSupabaseRest(base)) {
+    return request("books?select=*,category:categories(*)&is_approved=eq.false&order=id.desc", { method: "GET" });
+  }
+  return request("/books/admin/pending", { method: "GET" });
+};
+
+export const approveBook = async (bookId) => {
+  const base = getApiBase();
+  if (isSupabaseRest(base)) {
+    const rows = await request(`books?id=eq.${Number(bookId)}`, { method: "PATCH", body: JSON.stringify({ is_approved: true }) });
+    return Array.isArray(rows) ? rows[0] || null : rows;
+  }
+  return request(`/books/admin/${Number(bookId)}/approve`, { method: "PATCH" });
 };
 export const updateBook = async (bookId, payload) => {
   const base = getApiBase();
@@ -317,14 +479,67 @@ export const listCategories = async () => {
 export const createCategory = async (payload) => {
   const base = getApiBase();
   if (isSupabaseRest(base)) {
-    const rows = await request("categories", { method: "POST", body: JSON.stringify(payload) });
-    return Array.isArray(rows) ? rows[0] || null : rows;
+    let authUser = null;
+    try {
+      authUser = await supabaseGetUser();
+    } catch (e) {
+      if (e?.status === 401) {
+        clearToken();
+        throw new Error("Phiên đăng nhập Supabase không hợp lệ. Vui lòng Sign out và Sign in lại.");
+      }
+      throw e;
+    }
+    const uid = authUser?.id || null;
+    if (!uid) {
+      throw new Error("Bạn cần đăng nhập Supabase trước khi đăng ký category.");
+    }
+
+    let body = { ...(payload || {}) };
+    if (body.is_approved === false && body.created_by == null) {
+      body.created_by = uid;
+    }
+
+    try {
+      const rows = await request("categories", { method: "POST", body: JSON.stringify(body) });
+      const created = Array.isArray(rows) ? rows[0] || null : rows;
+      if (created?.id) {
+        return created;
+      }
+      const fallback = await request(`categories?select=*&created_by=eq.${uid}&order=id.desc&limit=1`, { method: "GET" });
+      const last = Array.isArray(fallback) ? fallback[0] || null : fallback;
+      if (last?.id) {
+        return last;
+      }
+      throw new Error("Tạo category thất bại. Vui lòng kiểm tra Supabase schema/policies (categories.created_by + RLS).");
+    } catch (e) {
+      if (e?.data?.code === "PGRST204") {
+        throw new Error("Supabase chưa có cột categories.created_by (schema cache chưa update). Chạy SQL trong database/supabase_setup.md để add columns, sau đó Reload schema cache / Restart API trên Supabase.");
+      }
+      throw e;
+    }
   }
   return request("/categories", {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(payload)
   });
+};
+
+export const listPendingCategories = async () => {
+  const base = getApiBase();
+  if (isSupabaseRest(base)) {
+    return request("categories?select=*&is_approved=eq.false&order=id.desc", { method: "GET" });
+  }
+  return request("/categories/admin/pending", { method: "GET" });
+};
+
+export const approveCategory = async (categoryId) => {
+  const base = getApiBase();
+  if (isSupabaseRest(base)) {
+    const rows = await request(`categories?id=eq.${Number(categoryId)}`, { method: "PATCH", body: JSON.stringify({ is_approved: true }) });
+    return Array.isArray(rows) ? rows[0] || null : rows;
+  }
+  return request(`/categories/admin/${Number(categoryId)}/approve`, { method: "PATCH" });
 };
 export const updateCategory = async (categoryId, payload) => {
   const base = getApiBase();
@@ -352,6 +567,66 @@ export const listListings = async () => {
     return request("listings?select=*,book:books(*,category:categories(*)),images:listing_images(*)&is_active=eq.true&order=id.desc", { method: "GET" });
   }
   return request("/listings", { method: "GET" });
+};
+
+export const listPendingListings = async () => {
+  const base = getApiBase();
+  if (isSupabaseRest(base)) {
+    return request("listings?select=*,book:books(*,category:categories(*)),images:listing_images(*)&is_active=eq.false&order=id.desc", { method: "GET" });
+  }
+  return request("/listings/admin/pending", { method: "GET" });
+};
+
+export const approveListing = async (listingId) => {
+  const base = getApiBase();
+  if (isSupabaseRest(base)) {
+    const rows = await request(`listings?id=eq.${Number(listingId)}`, { method: "PATCH", body: JSON.stringify({ is_active: true }) });
+    return Array.isArray(rows) ? rows[0] || null : rows;
+  }
+  return request(`/listings/admin/${Number(listingId)}/approve`, { method: "PATCH" });
+};
+
+export const searchBooks = async (query, mode = "title") => {
+  const q = String(query || "").trim();
+  if (!q) {
+    return [];
+  }
+  const base = getApiBase();
+  if (isSupabaseRest(base)) {
+    const esc = encodeURIComponent(q);
+    const filter = mode === "isbn" ? `isbn=ilike.*${esc}*` : `title=ilike.*${esc}*`;
+    return request(`books?select=*&${filter}&order=id.desc&limit=10`, { method: "GET" });
+  }
+  const books = await listBooks({ includeUnapproved: false });
+  const lower = q.toLowerCase();
+  const pick = mode === "isbn" ? (b) => String(b?.isbn || "").toLowerCase() : (b) => String(b?.title || "").toLowerCase();
+  return (books || []).filter((b) => pick(b).includes(lower)).slice(0, 10);
+};
+
+export const listListingsByBook = async (bookId) => {
+  const id = Number(bookId);
+  if (!Number.isFinite(id)) {
+    return [];
+  }
+  const base = getApiBase();
+  if (isSupabaseRest(base)) {
+    return request(`listings?select=*,book:books(*,category:categories(*)),images:listing_images(*)&is_active=eq.true&book_id=eq.${id}&order=id.desc`, { method: "GET" });
+  }
+  const all = await listListings();
+  return (all || []).filter((l) => Number(l.book_id) === id);
+};
+
+export const getListing = async (listingId) => {
+  const id = Number(listingId);
+  if (!Number.isFinite(id)) {
+    return null;
+  }
+  const base = getApiBase();
+  if (isSupabaseRest(base)) {
+    const rows = await request(`listings?select=*,book:books(*,category:categories(*)),images:listing_images(*)&id=eq.${id}&limit=1`, { method: "GET" });
+    return Array.isArray(rows) ? rows[0] || null : rows;
+  }
+  return request(`/listings/${id}`, { method: "GET" });
 };
 
 export const myListings = async () => {
@@ -400,6 +675,50 @@ export const createListing = async (payload) => {
     headers: { "content-type": "application/json" },
     body: JSON.stringify(payload)
   });
+};
+
+export const updateListing = async (listingId, payload) => {
+  const id = Number(listingId);
+  if (!Number.isFinite(id)) {
+    throw new Error("listing_id không hợp lệ.");
+  }
+  const base = getApiBase();
+  if (isSupabaseRest(base)) {
+    const rows = await request(`listings?id=eq.${id}`, { method: "PATCH", body: JSON.stringify(payload || {}) });
+    return Array.isArray(rows) ? rows[0] || null : rows;
+  }
+  return request(`/listings/${id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify(payload || {}) });
+};
+
+export const replaceListingImages = async (listingId, urls = []) => {
+  const id = Number(listingId);
+  if (!Number.isFinite(id)) {
+    throw new Error("listing_id không hợp lệ.");
+  }
+  const clean = (urls || []).map((u) => String(u || "").trim()).filter(Boolean);
+  const base = getApiBase();
+  if (isSupabaseRest(base)) {
+    await request(`listing_images?listing_id=eq.${id}`, { method: "DELETE" });
+    if (!clean.length) {
+      return [];
+    }
+    const rows = clean.map((url) => ({ listing_id: id, url }));
+    return request("listing_images", { method: "POST", body: JSON.stringify(rows) });
+  }
+  return request(`/listings/${id}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ images: clean }) });
+};
+
+export const markListingSold = async (listingId) => {
+  const id = Number(listingId);
+  if (!Number.isFinite(id)) {
+    throw new Error("listing_id không hợp lệ.");
+  }
+  const base = getApiBase();
+  if (isSupabaseRest(base)) {
+    const rows = await request(`listings?id=eq.${id}`, { method: "PATCH", body: JSON.stringify({ status: "sold" }) });
+    return Array.isArray(rows) ? rows[0] || null : rows;
+  }
+  return request(`/listings/${id}/sold`, { method: "PATCH" });
 };
 
 export const getMyMessages = async () => {

@@ -11,23 +11,42 @@ router = APIRouter(prefix="/categories", tags=["categories"])
 
 @router.get("", response_model=List[CategoryOut])
 def get_categories(db: Session = Depends(get_db)):
-    return db.query(Category).all()
+    return db.query(Category).filter(Category.is_approved == True).order_by(Category.id.asc()).all()
 
 @router.post("", response_model=CategoryOut, status_code=201)
 def create_category(payload: CategoryCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    # Maybe restrict to admin? The requirement doesn't specify, but usually only admin adds categories.
-    # For now, let's allow authenticated users or restrict to admin.
-    # Let's assume admin only for safety, or check requirements.
-    # Image says "Thêm thể loại" - POST categories.
-    # Let's assume admin.
-    if current_user.role != 'admin':
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
-    
+    if current_user.status == 'banned':
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Account is banned")
     existing = db.query(Category).filter(Category.name == payload.name).first()
     if existing:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Category already exists")
-    
-    category = Category(name=payload.name, description=payload.description)
+
+    data = payload.model_dump(exclude_none=True)
+    if current_user.role != 'admin':
+        data["is_approved"] = False
+    else:
+        data["is_approved"] = True if data.get("is_approved") is None else bool(data["is_approved"])
+    data["created_by"] = current_user.id
+    category = Category(**data)
+    db.add(category)
+    db.commit()
+    db.refresh(category)
+    return category
+
+@router.get("/admin/pending", response_model=List[CategoryOut])
+def admin_pending_categories(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    if current_user.role != 'admin':
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
+    return db.query(Category).filter(Category.is_approved == False).order_by(Category.id.desc()).all()
+
+@router.patch("/admin/{category_id}/approve", response_model=CategoryOut)
+def admin_approve_category(category_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    if current_user.role != 'admin':
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
+    category = db.query(Category).filter(Category.id == category_id).first()
+    if not category:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
+    category.is_approved = True
     db.add(category)
     db.commit()
     db.refresh(category)

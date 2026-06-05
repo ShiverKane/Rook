@@ -36,13 +36,14 @@
           <div class="font-headline-md text-headline-md">Inbox</div>
           <div class="mt-4 flex items-center gap-3 bg-surface-container-low px-4 py-3 rounded-full border border-outline-variant/20">
             <span class="material-symbols-outlined text-outline">search</span>
-            <input class="bg-transparent border-none focus:ring-0 text-body-md w-full placeholder:text-outline/60" placeholder="Search conversations..." type="text" />
+            <input class="bg-transparent border-none focus:ring-0 text-body-md w-full placeholder:text-outline/60" id="convo-search" placeholder="Search conversations..." type="text" />
           </div>
         </div>
         <div class="flex-1 overflow-y-auto">
-          <div class="p-6 text-on-surface-variant text-[12px]">
-            Nhắn tin với người bán/người mua. Khi bạn bấm “Message” ở Marketplace, form sẽ tự điền người nhận.
+          <div class="p-6 text-on-surface-variant text-[12px]" id="convo-empty">
+            Chọn 1 cuộc hội thoại bên dưới. Khi bạn bấm “Message” ở Marketplace, hệ thống sẽ tự mở đúng cuộc hội thoại.
           </div>
+          <div class="px-4 pb-4 space-y-2" id="convo-list"></div>
         </div>
       </aside>
       <section class="flex-1 flex flex-col bg-surface-container-lowest">
@@ -50,8 +51,8 @@
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-on-secondary font-bold">M</div>
             <div>
-              <div class="font-headline-md text-headline-md">My Messages</div>
-              <div class="text-on-surface-variant text-[12px]">Inbox</div>
+              <div class="font-headline-md text-headline-md" id="chat-title">My Messages</div>
+              <div class="text-on-surface-variant text-[12px]" id="chat-subtitle">Inbox</div>
             </div>
           </div>
           <button class="p-2 rounded-full hover:bg-surface-container-low transition-all active:scale-95">
@@ -59,13 +60,19 @@
           </button>
         </div>
         <div id="messages-status" style="display:none;"></div>
+        <div class="px-6 pt-4" id="listing-attach" style="display:none;">
+          <div class="bg-surface-container-low border border-outline-variant/20 rounded-xl p-4">
+            <div class="text-on-surface-variant text-[12px]">Listing</div>
+            <div class="font-label-md text-label-md text-on-surface mt-1" id="listing-attach-title"></div>
+          </div>
+        </div>
         <div id="messages-list" class="flex-1 overflow-y-auto p-6 space-y-4"></div>
         <div class="p-6 border-t border-outline-variant/30">
-          <form class="grid grid-cols-1 md:grid-cols-7 gap-3 items-center" onsubmit="return false;">
-            <input class="md:col-span-1 bg-surface-container-low border border-outline-variant/20 rounded-lg px-4 py-3 focus:ring-1 focus:ring-primary" id="msg-listing-id" placeholder="Listing (optional)" type="number" />
-            <input class="md:col-span-1 bg-surface-container-low border border-outline-variant/20 rounded-lg px-4 py-3 focus:ring-1 focus:ring-primary" id="msg-receiver-id" placeholder="To (User ID)" type="text" />
-            <input class="md:col-span-4 bg-surface-container-low border border-outline-variant/20 rounded-lg px-4 py-3 focus:ring-1 focus:ring-primary" id="msg-body" placeholder="Write a message..." type="text" />
-            <button class="md:col-span-1 bg-primary text-on-primary px-4 py-3 rounded-lg font-label-md hover:opacity-90 transition-all" id="msg-send" type="button">
+          <form class="flex gap-3 items-center" onsubmit="return false;">
+            <input id="msg-listing-id" type="hidden" />
+            <input id="msg-receiver-id" type="hidden" />
+            <input class="flex-1 bg-surface-container-low border border-outline-variant/20 rounded-lg px-4 py-3 focus:ring-1 focus:ring-primary" id="msg-body" placeholder="Write a message..." type="text" />
+            <button class="bg-primary text-on-primary px-6 py-3 rounded-lg font-label-md hover:opacity-90 transition-all" id="msg-send" type="button">
               Send
             </button>
           </form>

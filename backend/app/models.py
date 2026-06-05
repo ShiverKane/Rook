@@ -25,6 +25,8 @@ class Category(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), unique=True, nullable=False)
     description = Column(Text, nullable=True)
+    is_approved = Column(Boolean, default=True, nullable=False)
+    created_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
     books = relationship("Book", back_populates="category")
 
 class Book(Base):
@@ -36,6 +38,8 @@ class Book(Base):
     language = Column(String(16), nullable=False, default="und")
     isbn = Column(String(32), unique=True, index=True, nullable=True)
     description = Column(Text, nullable=True)
+    is_approved = Column(Boolean, default=True, nullable=False)
+    created_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
     category = relationship("Category", back_populates="books")
     listings = relationship("Listing", back_populates="book", cascade="all, delete")
 

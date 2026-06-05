@@ -491,22 +491,26 @@ const renderCrud = async (mount) => {
 
 const routes = {
   "/home": { type: "html", html: "./pages/home.html", title: "Home" },
-  "/search": { type: "html", html: "./pages/search.html", title: "Search" },
+  "/search": { type: "html", html: "./pages/search.html", module: "./pages/search.js", title: "Search" },
   "/signin": { type: "html", html: "./pages/signin.html", module: "./pages/signin.js", title: "Sign In" },
+  "/signup": { type: "html", html: "./pages/signin.html", module: "./pages/signin.js", title: "Sign Up" },
   "/profile": { type: "html", html: "./pages/profile.html", module: "./pages/profile.js", title: "Profile" },
   "/marketplace": { type: "html", html: "./pages/marketplace.html", module: "./pages/marketplace.js", title: "Marketplace" },
   "/sellerdashboard": { type: "html", html: "./pages/sellerdashboard.html", module: "./pages/sellerdashboard.js", title: "Seller Dashboard" },
-  "/managelisting": { type: "html", html: "./pages/managelisting.html", module: "./pages/managelisting.js", title: "Manage Listing" },
+  "/managelisting": { type: "html", html: "./pages/managelisting.html", module: "./pages/managelisting.js?v=7", title: "Manage Listing" },
   "/messages": { type: "html", html: "./pages/messages.html", module: "./pages/messages.js", title: "Messages" },
   "/admin-dashboard": { type: "html", html: "./pages/admin-dashboard.html", module: "./pages/admin-dashboard.js", title: "Admin Dashboard" },
   "/crud": { type: "render", render: renderCrud, title: "Admin CRUD" }
 };
 
 const handleRoute = async () => {
-  const route = normalizeRoute(location.hash);
-  const def = routes[route] || routes["/home"];
+  const fullRoute = normalizeRoute(location.hash);
+  const routePath = fullRoute.split("?")[0] || "/home";
+  const queryString = fullRoute.includes("?") ? fullRoute.slice(fullRoute.indexOf("?") + 1) : "";
+  const query = new URLSearchParams(queryString);
+  const def = routes[routePath] || routes["/home"];
   await renderShellAuth();
-  setActiveNav(route);
+  setActiveNav(routePath);
 
   const mount = qs("#spa-view");
   if (!mount) {
@@ -544,7 +548,7 @@ const handleRoute = async () => {
   if (def.module) {
     const mod = await import(def.module);
     if (typeof mod.init === "function") {
-      await mod.init({ navigate });
+      await mod.init({ navigate, route: routePath, fullRoute, query });
     }
   }
 };

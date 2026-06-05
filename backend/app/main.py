@@ -3,10 +3,11 @@ from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 import os
-from .db import Base, engine
+from .db import Base, engine, ensure_schema_migrations
 from .routers import auth, books, listings, users, categories, messages
 
 Base.metadata.create_all(bind=engine)
+ensure_schema_migrations()
 
 description = """
 Used Books Marketplace API helps you do awesome stuff. 🚀

@@ -12,6 +12,25 @@ router = APIRouter(prefix="/listings", tags=["listings"])
 def list_listings(db: Session = Depends(get_db)):
     return db.query(Listing).filter(Listing.is_active == True).order_by(Listing.id.desc()).all()
 
+@router.get("/admin/pending", response_model=List[ListingOut])
+def admin_pending_listings(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    if current_user.role != 'admin':
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
+    return db.query(Listing).filter(Listing.is_active == False).order_by(Listing.id.desc()).all()
+
+@router.patch("/admin/{listing_id}/approve", response_model=ListingOut)
+def admin_approve_listing(listing_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    if current_user.role != 'admin':
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
+    listing = db.query(Listing).filter(Listing.id == listing_id).first()
+    if not listing:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Listing not found")
+    listing.is_active = True
+    db.add(listing)
+    db.commit()
+    db.refresh(listing)
+    return listing
+
 @router.get("/{listing_id}", response_model=ListingOut)
 def get_listing(listing_id: int, db: Session = Depends(get_db)):
     listing = db.query(Listing).filter(Listing.id == listing_id).first()
