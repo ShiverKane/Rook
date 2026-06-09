@@ -182,10 +182,10 @@ export const init = async (opts = {}) => {
     try {
       existing = await getListing(editListingId);
       if (!existing?.id) {
-        throw new Error("Không tìm thấy listing.");
+        throw new Error("Listing not found.");
       }
     } catch (e) {
-      setStatus(statusEl, e?.message || "Không load được listing để edit.", "error");
+      setStatus(statusEl, e?.message || "Couldn't load listing for editing.", "error");
       return;
     }
   }
@@ -195,7 +195,7 @@ export const init = async (opts = {}) => {
       bookId.innerHTML = "";
       const placeholder = document.createElement("option");
       placeholder.value = "";
-      placeholder.textContent = "Chọn sách...";
+      placeholder.textContent = "Select a book...";
       bookId.appendChild(placeholder);
       const books = await listBooks();
       for (const b of books || []) {
@@ -216,7 +216,7 @@ export const init = async (opts = {}) => {
       categorySelect.value = "";
     }
   } catch (e) {
-    setStatus(statusEl, e?.message || "Không tải được danh sách sách.", "error");
+    setStatus(statusEl, e?.message || "Couldn't load books list.", "error");
   }
 
   if (isEdit && existing) {
@@ -301,7 +301,7 @@ export const init = async (opts = {}) => {
       try {
         const name = catNameInput?.value?.trim() || "";
         if (!name) {
-          throw new Error("Vui lòng nhập name.");
+          throw new Error("Please enter a name.");
         }
         const description = (catDescInput?.value || "").trim() || null;
         const created = await createCategory({
@@ -310,13 +310,13 @@ export const init = async (opts = {}) => {
           is_approved: false
         });
         if (!created?.id) {
-          throw new Error("Tạo category thất bại.");
+          throw new Error("Failed to create category.");
         }
         addCategoryOption(created, { pending: true });
         closeCatModal();
       } catch (e) {
         const detail = e?.data ? `\n${typeof e.data === "string" ? e.data : JSON.stringify(e.data)}` : "";
-        setStatus(catModalStatus, `${e?.message || "Tạo category thất bại."}${detail}`, "error");
+        setStatus(catModalStatus, `${e?.message || "Failed to create category."}${detail}`, "error");
       } finally {
         catModalSave.disabled = false;
       }
@@ -331,10 +331,10 @@ export const init = async (opts = {}) => {
         const title = titleInput?.value?.trim() || "";
         const author = authorInput?.value?.trim() || "";
         if (!title) {
-          throw new Error("Vui lòng nhập title.");
+          throw new Error("Please enter a title.");
         }
         if (!author) {
-          throw new Error("Vui lòng nhập author.");
+          throw new Error("Please enter an author.");
         }
         const lang = (languageInput?.value || "").trim() || "und";
         const isbn = (isbnInput?.value || "").trim() || null;
@@ -351,13 +351,13 @@ export const init = async (opts = {}) => {
           is_approved: false
         });
         if (!created?.id) {
-          throw new Error("Tạo sách thất bại.");
+          throw new Error("Failed to create book.");
         }
         addBookOption(created, { pending: true });
         closeModal();
       } catch (e) {
         const detail = e?.data ? `\n${typeof e.data === "string" ? e.data : JSON.stringify(e.data)}` : "";
-        setStatus(modalStatus, `${e?.message || "Tạo sách thất bại."}${detail}`, "error");
+        setStatus(modalStatus, `${e?.message || "Failed to create book."}${detail}`, "error");
       } finally {
         modalSave.disabled = false;
       }
@@ -379,7 +379,7 @@ export const init = async (opts = {}) => {
     try {
       const selectedBook = bookId?.value || "";
       if (!selectedBook) {
-        throw new Error("Vui lòng chọn sách.");
+        throw new Error("Please select a book.");
       }
       if (isEdit && existing?.id) {
         const payload = {
@@ -394,7 +394,7 @@ export const init = async (opts = {}) => {
           const urls = await uploadListingImages(selectedFiles);
           await replaceListingImages(existing.id, urls);
         }
-        setStatus(statusEl, `Đã cập nhật listing #${existing.id}.`, "success");
+        setStatus(statusEl, `Updated listing #${existing.id}.`, "success");
         setTimeout(() => {
           if (navigate) {
             navigate("/sellerdashboard");
@@ -413,7 +413,7 @@ export const init = async (opts = {}) => {
           images: urls
         };
         const out = await createListing(payload);
-        setStatus(statusEl, `Đã tạo listing #${out.id}. Chờ admin duyệt.`, "success");
+        setStatus(statusEl, `Created listing #${out.id}. Pending admin approval.`, "success");
         setTimeout(() => {
           if (navigate) {
             navigate("/marketplace");
@@ -432,7 +432,7 @@ export const init = async (opts = {}) => {
         location.href = "./signin.html";
         return;
       }
-      setStatus(statusEl, e.message || "Tạo listing thất bại", "error");
+      setStatus(statusEl, e.message || "Failed to create listing.", "error");
     } finally {
       btn.disabled = false;
     }

@@ -89,9 +89,9 @@ export const init = async (opts = {}) => {
               await markListingSold(l.id);
               const fresh = await myListings();
               renderListings(fresh);
-              setStatus(status, `Đã chuyển listing #${l.id} sang sold.`, "success");
+              setStatus(status, `Marked listing #${l.id} as sold.`, "success");
             } catch (e) {
-              setStatus(status, e.message || "Cập nhật sold thất bại", "error");
+              setStatus(status, e.message || "Failed to mark as sold.", "error");
             } finally {
               soldBtn.disabled = false;
             }
@@ -117,7 +117,7 @@ export const init = async (opts = {}) => {
       location.href = "./signin.html";
       return;
     }
-    setStatus(status, e.message || "Không tải được dữ liệu", "error");
+    setStatus(status, e.message || "Couldn't load data.", "error");
   }
 };
 

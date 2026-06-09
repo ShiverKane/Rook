@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Listing</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="../assets/js/theme.js"></script>
+    <link rel="stylesheet" href="../assets/css/theme.css" />
+    <link rel="stylesheet" href="../assets/css/pages.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
+  </head>
+  <body class="bg-background text-on-background font-body-md antialiased">
+    <header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 shadow-sm">
+      <div class="max-w-container-max mx-auto px-margin-page flex items-center justify-between h-20">
+        <div class="flex items-center gap-stack-lg">
+          <a class="font-display-lg text-headline-md text-primary" href="./home.html">Curated Sanctuary</a>
+          <nav class="hidden md:flex gap-gutter items-center ml-stack-lg">
+            <a class="font-body-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="./home.html">Collections</a>
+            <a class="font-body-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="./marketplace.html">Shop</a>
+            <a class="font-body-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="./sellerdashboard.html">Sell</a>
+            <a class="font-body-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="./messages.html">Messages</a>
+          </nav>
+        </div>
+        <div class="flex items-center gap-stack-md">
+          <a class="p-2 rounded-full hover:bg-surface-container-low transition-all active:scale-95" href="./messages.html">
+            <span class="material-symbols-outlined text-primary">chat</span>
+          </a>
+          <a class="p-2 rounded-full hover:bg-surface-container-low transition-all active:scale-95" href="./profile.html">
+            <span class="material-symbols-outlined text-primary">account_circle</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main class="pt-32 pb-stack-lg max-w-container-max mx-auto px-margin-page">
+      <div class="flex items-center justify-between gap-3">
+        <a class="text-primary hover:underline font-label-md text-label-md" href="./marketplace.html">← Back to Marketplace</a>
+      </div>
+
+      <div id="listing-status" style="display:none;"></div>
+
+      <section class="mt-stack-md grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+        <div class="lg:col-span-2 space-y-4">
+          <div class="bg-surface-container-lowest border border-outline-variant/20 rounded-xl overflow-hidden">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-0" id="listing-images"></div>
+          </div>
+          <div class="bg-surface-container-lowest border border-outline-variant/20 rounded-xl p-6">
+            <div class="font-headline-lg text-headline-lg text-on-surface" id="listing-title">Listing</div>
+            <div class="text-on-surface-variant mt-2" id="listing-author"></div>
+            <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="bg-surface-container-low rounded-xl p-4 border border-outline-variant/20">
+                <div class="text-on-surface-variant text-[12px]">Price</div>
+                <div class="font-headline-md text-headline-md text-primary mt-1" id="listing-price"></div>
+              </div>
+              <div class="bg-surface-container-low rounded-xl p-4 border border-outline-variant/20">
+                <div class="text-on-surface-variant text-[12px]">Condition</div>
+                <div class="font-label-md text-label-md text-on-surface mt-1" id="listing-condition"></div>
+              </div>
+              <div class="bg-surface-container-low rounded-xl p-4 border border-outline-variant/20">
+                <div class="text-on-surface-variant text-[12px]">Status</div>
+                <div class="font-label-md text-label-md text-on-surface mt-1" id="listing-status-text"></div>
+              </div>
+              <div class="bg-surface-container-low rounded-xl p-4 border border-outline-variant/20">
+                <div class="text-on-surface-variant text-[12px]">Listing ID</div>
+                <div class="font-label-md text-label-md text-on-surface mt-1" id="listing-id"></div>
+              </div>
+            </div>
+            <div class="mt-6">
+              <div class="text-on-surface-variant text-[12px]">Description</div>
+              <div class="text-on-surface mt-1 whitespace-pre-wrap" id="listing-desc"></div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="bg-surface-container-lowest border border-outline-variant/20 rounded-xl p-6 h-fit">
+          <div class="font-headline-md text-headline-md text-on-surface">Seller</div>
+          <div class="mt-4 flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full bg-secondary overflow-hidden relative flex items-center justify-center" id="seller-avatar" data-avatar data-avatar-name="" data-avatar-url="">
+              <img alt="Avatar" class="w-full h-full object-cover" style="display: none" data-avatar-img />
+              <div class="absolute inset-0 flex items-center justify-center font-bold text-on-secondary text-sm" data-avatar-fallback></div>
+            </div>
+            <div class="min-w-0">
+              <div class="font-label-md text-label-md text-on-surface truncate" id="seller-name"></div>
+              <div class="text-on-surface-variant text-[12px]" id="seller-sub"></div>
+            </div>
+          </div>
+          <div class="mt-4 grid grid-cols-1 gap-3">
+            <button class="bg-primary text-on-primary px-6 py-3 rounded-lg font-label-md hover:opacity-90 transition-all" id="seller-message" type="button">Message seller</button>
+            <a class="text-primary hover:underline font-label-md text-label-md" href="./profile.html" id="seller-profile-link">View profile</a>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <script type="module" src="../assets/js/pages/listing.js"></script>
+  </body>
+</html>
+

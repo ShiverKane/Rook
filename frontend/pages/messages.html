@@ -41,7 +41,7 @@
         </div>
         <div class="flex-1 overflow-y-auto">
           <div class="p-6 text-on-surface-variant text-[12px]" id="convo-empty">
-            Chọn 1 cuộc hội thoại bên dưới. Khi bạn bấm “Message” ở Marketplace, hệ thống sẽ tự mở đúng cuộc hội thoại.
+            Select a conversation below. When you click “Message” in Marketplace, it will open the right thread automatically.
           </div>
           <div class="px-4 pb-4 space-y-2" id="convo-list"></div>
         </div>
@@ -55,9 +55,16 @@
               <div class="text-on-surface-variant text-[12px]" id="chat-subtitle">Inbox</div>
             </div>
           </div>
-          <button class="p-2 rounded-full hover:bg-surface-container-low transition-all active:scale-95">
+          <div class="relative">
+          <button class="p-2 rounded-full hover:bg-surface-container-low transition-all active:scale-95" id="chat-more" type="button" aria-haspopup="menu" aria-expanded="false">
             <span class="material-symbols-outlined text-primary">more_vert</span>
           </button>
+          <div class="absolute right-0 mt-2 w-56 bg-surface-container-lowest border border-outline-variant/30 rounded-xl shadow-lg overflow-hidden hidden" id="chat-menu" role="menu">
+            <button class="w-full text-left px-4 py-3 hover:bg-surface-container-low transition-all" type="button" data-chat-action="view-profile" role="menuitem">View profile</button>
+            <button class="w-full text-left px-4 py-3 hover:bg-surface-container-low transition-all" type="button" data-chat-action="report" role="menuitem">Report</button>
+            <button class="w-full text-left px-4 py-3 hover:bg-surface-container-low transition-all text-error" type="button" data-chat-action="block" role="menuitem">Block</button>
+          </div>
+          </div>
         </div>
         <div id="messages-status" style="display:none;"></div>
         <div class="px-6 pt-4" id="listing-attach" style="display:none;">

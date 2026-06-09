@@ -62,6 +62,8 @@ export const init = async (opts = {}) => {
   const chatSubtitle = qs("#chat-subtitle");
   const attachBox = qs("#listing-attach");
   const attachTitle = qs("#listing-attach-title");
+  const moreBtn = qs("#chat-more");
+  const menu = qs("#chat-menu");
 
   setStatus(status, "");
   let myId = null;
@@ -69,6 +71,26 @@ export const init = async (opts = {}) => {
   let conversations = [];
   let selected = null;
   let peerProfiles = new Map();
+  let listingSummaries = new Map();
+  let blocked = new Set();
+
+  const loadBlocked = () => {
+    try {
+      const raw = localStorage.getItem("rook_blocked_users") || "[]";
+      const arr = JSON.parse(raw);
+      blocked = new Set(Array.isArray(arr) ? arr.map((v) => normalizeId(v)).filter(Boolean) : []);
+    } catch {
+      blocked = new Set();
+    }
+  };
+
+  const saveBlocked = () => {
+    try {
+      localStorage.setItem("rook_blocked_users", JSON.stringify(Array.from(blocked)));
+    } catch {}
+  };
+
+  const isBlocked = (peerId) => blocked.has(normalizeId(peerId));
 
   const peerLabel = (peerId) => {
     const id = normalizeId(peerId);
@@ -78,7 +100,7 @@ export const init = async (opts = {}) => {
     const p = peerProfiles.get(id) || null;
     const name = String(p?.name || "").trim();
     const email = String(p?.email || "").trim();
-    return name || email || `User ${shortId(id)}`;
+    return name || email || "User";
   };
 
   const hydratePeerProfiles = async (convos) => {
@@ -101,10 +123,63 @@ export const init = async (opts = {}) => {
     }
   };
 
+  const hydrateListingSummaries = async (convos) => {
+    const ids = Array.from(
+      new Set(
+        (convos || [])
+          .map((c) => normalizeId(c?.listingId))
+          .filter(Boolean)
+      )
+    )
+      .map((v) => Number.parseInt(String(v), 10))
+      .filter((n) => Number.isFinite(n) && n > 0)
+      .map((n) => String(n));
+
+    if (!ids.length) {
+      listingSummaries = new Map();
+      return;
+    }
+
+    try {
+      const results = await Promise.allSettled(ids.map((id) => getListing(id)));
+      const map = new Map();
+      for (let i = 0; i < results.length; i += 1) {
+        const r = results[i];
+        if (r.status !== "fulfilled") continue;
+        const info = r.value;
+        if (!info?.id) continue;
+        const title = String(info?.book?.title || "").trim();
+        const author = String(info?.book?.author || "").trim();
+        const img = String(info?.images?.[0]?.url || "").trim();
+        map.set(String(info.id), { title, author, img });
+      }
+      listingSummaries = map;
+    } catch {
+      listingSummaries = new Map();
+    }
+  };
+
+  const listingLabel = (listingIdValue) => {
+    const lid = normalizeId(listingIdValue);
+    if (!lid) {
+      return "";
+    }
+    const s = listingSummaries.get(lid) || null;
+    const t = String(s?.title || "").trim();
+    const a = String(s?.author || "").trim();
+    if (t) {
+      return `${t}${a ? ` — ${a}` : ""}`;
+    }
+    return `Listing #${lid}`;
+  };
+
   const buildConversations = (msgs) => {
     const map = new Map();
     for (const m of msgs || []) {
       const peer = normalizeId(m.sender_id) === normalizeId(myId) ? normalizeId(m.receiver_id) : normalizeId(m.sender_id);
+      if (peer && isBlocked(peer)) {
+        continue;
+      }
       const lid = m.listing_id == null ? "" : normalizeId(m.listing_id);
       const key = `${peer}::${lid}`;
       const existing = map.get(key);
@@ -125,8 +200,9 @@ export const init = async (opts = {}) => {
         return true;
       }
       const peer = (peerLabel(c.peerId) || "").toLowerCase();
+      const listing = (listingLabel(c.listingId) || "").toLowerCase();
       const lid = (c.listingId || "").toLowerCase();
-      return peer.includes(q) || lid.includes(q);
+      return peer.includes(q) || listing.includes(q) || lid.includes(q);
     });
     convoList.innerHTML = "";
     if (convoEmpty) {
@@ -139,6 +215,25 @@ export const init = async (opts = {}) => {
       btn.className = active
         ? "w-full text-left p-4 rounded-xl bg-surface-container-high border border-outline-variant/20"
         : "w-full text-left p-4 rounded-xl bg-surface-container-low hover:bg-surface-container-high transition-all border border-outline-variant/20";
+
+      const row = document.createElement("div");
+      row.className = "flex items-start gap-3";
+      const thumb = document.createElement("div");
+      thumb.className = "w-10 h-10 rounded-lg bg-surface-container-high overflow-hidden shrink-0 flex items-center justify-center text-outline";
+      const lid = normalizeId(c.listingId);
+      const img = lid ? String(listingSummaries.get(lid)?.img || "") : "";
+      if (img) {
+        const image = document.createElement("img");
+        image.src = img;
+        image.alt = listingLabel(lid) || "Listing image";
+        image.className = "w-full h-full object-cover";
+        thumb.appendChild(image);
+      } else {
+        thumb.textContent = "BK";
+      }
+
+      const content = document.createElement("div");
+      content.className = "min-w-0 flex-1";
       const top = document.createElement("div");
       top.className = "flex items-center justify-between gap-3";
       const title = document.createElement("div");
@@ -151,10 +246,15 @@ export const init = async (opts = {}) => {
       top.appendChild(time);
       const sub = document.createElement("div");
       sub.className = "text-on-surface-variant text-[12px] mt-2";
-      const lid = c.listingId ? `Listing #${c.listingId} • ` : "";
-      sub.textContent = `${lid}${String(c.last.body || "").slice(0, 80)}`;
-      btn.appendChild(top);
-      btn.appendChild(sub);
+      const listingText = listingLabel(c.listingId);
+      const prefix = listingText ? `${listingText} • ` : "";
+      sub.textContent = `${prefix}${String(c.last.body || "").slice(0, 80)}`;
+
+      content.appendChild(top);
+      content.appendChild(sub);
+      row.appendChild(thumb);
+      row.appendChild(content);
+      btn.appendChild(row);
       btn.addEventListener("click", () => {
         selected = c;
         if (receiverId) {
@@ -180,17 +280,19 @@ export const init = async (opts = {}) => {
     }
     const peer = selected?.peerId || normalizeId(receiverId?.value);
     const lid = selected?.listingId ?? (listingId?.value ? normalizeId(listingId.value) : null);
+    const blockedPeer = peer ? isBlocked(peer) : false;
     if (chatTitle) {
       chatTitle.textContent = peer ? `Chat with ${peerLabel(peer)}` : "My Messages";
     }
     if (chatSubtitle) {
-      chatSubtitle.textContent = lid ? `Listing #${lid}` : "Inbox";
+      chatSubtitle.textContent = lid ? (listingLabel(lid) || `Listing #${lid}`) : "Inbox";
     }
     if (attachBox) {
       attachBox.style.display = lid ? "block" : "none";
+      attachBox.style.cursor = lid ? "pointer" : "";
     }
     if (attachTitle) {
-      attachTitle.textContent = lid ? `Listing #${lid}` : "";
+      attachTitle.textContent = lid ? (listingLabel(lid) || `Listing #${lid}`) : "";
     }
     if (lid) {
       try {
@@ -201,6 +303,18 @@ export const init = async (opts = {}) => {
           attachTitle.textContent = title ? `${title}${author ? ` — ${author}` : ""}` : `Listing #${lid}`;
         }
       } catch {}
+    }
+
+    if (body) {
+      body.disabled = blockedPeer;
+    }
+    if (btn) {
+      btn.disabled = blockedPeer;
+    }
+    if (blockedPeer) {
+      setStatus(status, "You have blocked this user.", "error");
+    } else {
+      setStatus(status, "");
     }
 
     const filtered = (allMessages || []).filter((m) => {
@@ -219,7 +333,42 @@ export const init = async (opts = {}) => {
     list.scrollTop = list.scrollHeight;
   };
 
+  if (attachBox) {
+    attachBox.addEventListener("click", () => {
+      const lid = selected?.listingId ?? (listingId?.value ? normalizeId(listingId.value) : null);
+      const id = lid ? Number.parseInt(String(lid), 10) : null;
+      if (!id || !Number.isFinite(id)) {
+        return;
+      }
+      if (navigate) {
+        navigate(`/listing?id=${id}`);
+        return;
+      }
+      location.href = `./listing.html?id=${id}`;
+    });
+  }
+
+  const hideMenu = () => {
+    if (!menu) return;
+    menu.classList.add("hidden");
+    if (moreBtn) {
+      moreBtn.setAttribute("aria-expanded", "false");
+    }
+  };
+
+  const toggleMenu = () => {
+    if (!menu) return;
+    const willShow = menu.classList.contains("hidden");
+    if (willShow) {
+      menu.classList.remove("hidden");
+      if (moreBtn) moreBtn.setAttribute("aria-expanded", "true");
+      return;
+    }
+    hideMenu();
+  };
+
   try {
+    loadBlocked();
     const user = await me();
     myId = user?.id || null;
     const draftTo = localStorage.getItem("rook_msg_to");
@@ -233,6 +382,7 @@ export const init = async (opts = {}) => {
     allMessages = await getMyMessages();
     conversations = buildConversations(allMessages);
     await hydratePeerProfiles(conversations);
+    await hydrateListingSummaries(conversations);
     const initialPeer = normalizeId(draftTo || receiverId?.value || "");
     const initialListing = normalizeId(draftListing || listingId?.value || "");
     if (initialPeer) {
@@ -257,7 +407,76 @@ export const init = async (opts = {}) => {
       location.href = "./signin.html";
       return;
     }
-    setStatus(status, e.message || "Không tải được messages", "error");
+    setStatus(status, e.message || "Couldn't load messages.", "error");
+  }
+
+  if (moreBtn) {
+    moreBtn.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      toggleMenu();
+    });
+    document.addEventListener("click", () => hideMenu());
+  }
+
+  if (menu) {
+    menu.addEventListener("click", async (ev) => {
+      const target = ev.target;
+      if (!(target instanceof HTMLElement)) return;
+      const action = target.getAttribute("data-chat-action");
+      if (!action) return;
+      ev.preventDefault();
+      ev.stopPropagation();
+      hideMenu();
+
+      const peer = selected?.peerId || normalizeId(receiverId?.value);
+      const lid = selected?.listingId ?? (listingId?.value ? normalizeId(listingId.value) : null);
+      if (!peer) {
+        setStatus(status, "No conversation selected.", "error");
+        return;
+      }
+
+      if (action === "view-profile") {
+        const url = navigate ? `/profile?id=${encodeURIComponent(peer)}` : `./profile.html?id=${encodeURIComponent(peer)}`;
+        if (navigate) {
+          navigate(url);
+        } else {
+          location.href = url;
+        }
+        return;
+      }
+
+      if (action === "block") {
+        if (!confirm(`Block ${peerLabel(peer)}?`)) {
+          return;
+        }
+        blocked.add(normalizeId(peer));
+        saveBlocked();
+        conversations = buildConversations(allMessages);
+        await hydratePeerProfiles(conversations);
+        await hydrateListingSummaries(conversations);
+        selected = conversations[0] || null;
+        if (selected) {
+          if (receiverId) receiverId.value = selected.peerId || "";
+          if (listingId) listingId.value = selected.listingId || "";
+        }
+        renderConversations();
+        await renderThread();
+        return;
+      }
+
+      if (action === "report") {
+        const reason = prompt("Report reason (optional):", "");
+        try {
+          const raw = localStorage.getItem("rook_reports") || "[]";
+          const arr = JSON.parse(raw);
+          const list = Array.isArray(arr) ? arr : [];
+          list.unshift({ peerId: peer, listingId: lid || null, reason: (reason || "").trim() || null, at: new Date().toISOString() });
+          localStorage.setItem("rook_reports", JSON.stringify(list.slice(0, 50)));
+        } catch {}
+        setStatus(status, "Reported.", "success");
+      }
+    });
   }
 
   if (btn) {
@@ -267,7 +486,11 @@ export const init = async (opts = {}) => {
       try {
         const to = normalizeId(receiverId?.value || "");
         if (!to) {
-          setStatus(status, "Chưa chọn người nhận.", "error");
+          setStatus(status, "No recipient selected.", "error");
+          return;
+        }
+        if (isBlocked(to)) {
+          setStatus(status, "You have blocked this user.", "error");
           return;
         }
         const lid = listingId?.value ? normalizeId(listingId.value) : null;
@@ -277,7 +500,7 @@ export const init = async (opts = {}) => {
           body: body?.value || ""
         };
         if (!payload.body.trim()) {
-          setStatus(status, "Nội dung không được trống.", "error");
+          setStatus(status, "Message can't be empty.", "error");
           return;
         }
         try {
@@ -288,6 +511,7 @@ export const init = async (opts = {}) => {
         allMessages = await getMyMessages();
         conversations = buildConversations(allMessages);
         await hydratePeerProfiles(conversations);
+        await hydrateListingSummaries(conversations);
         const key = `${to}::${lid || ""}`;
         selected = conversations.find((c) => c.key === key) || selected;
         renderConversations();
@@ -295,9 +519,9 @@ export const init = async (opts = {}) => {
         if (body) {
           body.value = "";
         }
-        setStatus(status, "Đã gửi", "success");
+        setStatus(status, "Sent.", "success");
       } catch (e) {
-        setStatus(status, e.message || "Gửi thất bại", "error");
+        setStatus(status, e.message || "Send failed.", "error");
       } finally {
         btn.disabled = false;
       }

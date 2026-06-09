@@ -45,7 +45,7 @@
           <div id="profile-badges" class="flex flex-wrap justify-center md:justify-start gap-2 pt-2"></div>
         </div>
         <div class="flex gap-3">
-          <a class="px-6 py-2 bg-primary text-on-primary rounded-lg font-label-md hover:opacity-90 transition-opacity active:scale-95" href="./sellerdashboard.html">Dashboard</a>
+          <a class="px-6 py-2 bg-primary text-on-primary rounded-lg font-label-md hover:opacity-90 transition-opacity active:scale-95" href="./sellerdashboard.html" id="profile-dashboard-link">Dashboard</a>
         </div>
       </header>
       <section class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
@@ -65,12 +65,9 @@
           </div>
         </div>
         <aside class="bg-surface-container-lowest border border-outline-variant/20 rounded-xl p-6">
-          <div class="font-headline-md text-headline-md text-on-surface">Actions</div>
-          <div class="mt-4 space-y-3">
-            <a class="block px-4 py-3 rounded-xl bg-surface-container-low hover:bg-surface-container-high transition-all" href="./messages.html">Messages</a>
-            <a class="block px-4 py-3 rounded-xl bg-surface-container-low hover:bg-surface-container-high transition-all" href="./managelisting.html">Create Listing</a>
-            <button class="w-full text-left block px-4 py-3 rounded-xl bg-surface-container-low hover:bg-surface-container-high transition-all" id="profile-signout" type="button">Sign out</button>
-          </div>
+          <div class="font-headline-md text-headline-md text-on-surface">Available Listings</div>
+          <div class="text-on-surface-variant text-[12px] mt-1" id="profile-listings-subtitle"></div>
+          <div class="mt-4 space-y-3" id="profile-listings"></div>
         </aside>
       </section>
     </main>

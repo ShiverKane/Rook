@@ -3,18 +3,481 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script src="./assets/js/theme.js"></script>
-    <link rel="stylesheet" href="./assets/css/theme.css" />
-    <link rel="stylesheet" href="./assets/css/pages.css" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
+    <link rel="icon" href="data:," />
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="image" href="/ui/assets/img/homebackground.webp" fetchpriority="high" />
+    <script defer src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <style>
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        background: radial-gradient(1100px 650px at 15% 15%, rgba(201, 231, 202, 0.35) 0%, rgba(248, 250, 246, 0) 55%),
+          radial-gradient(900px 560px at 85% 25%, rgba(13, 99, 27, 0.08) 0%, rgba(248, 250, 246, 0) 60%),
+          #f8faf6;
+        color: #191c1a;
+        -webkit-font-smoothing: antialiased;
+        font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      }
+
+      .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+        vertical-align: middle;
+      }
+
+      .soft-shadow {
+        box-shadow: 0 22px 34px -26px rgba(13, 99, 27, 0.22), 0 10px 16px -12px rgba(13, 99, 27, 0.12);
+      }
+
+      .rook-brand {
+        font-family: Newsreader, Georgia, "Times New Roman", Times, serif;
+        font-size: 52px;
+        line-height: 1;
+        letter-spacing: -0.02em;
+        font-weight: 700;
+      }
+
+      @media (max-width: 640px) {
+        .rook-brand {
+          font-size: 44px;
+        }
+      }
+
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #e1e3df;
+        border-radius: 10px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: #bfcaba;
+      }
+
+      .soft-sage-bg {
+        background: linear-gradient(135deg, #f8faf6 0%, #e8f5e9 100%);
+      }
+
+      .auth-card {
+        box-shadow: 0 20px 40px -15px rgba(13, 99, 27, 0.04);
+      }
+
+      .reading-list-divider {
+        border-bottom: 1px solid #e8f5e9;
+      }
+
+      .marketplace-card {
+        height: 420px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .marketplace-card__body {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .marketplace-card__title {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+      }
+
+      .marketplace-card__author {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 1;
+        overflow: hidden;
+      }
+
+      .marketplace-card__row {
+        margin-top: auto !important;
+      }
+
+      .flex {
+        display: flex;
+      }
+
+      .flex-col {
+        flex-direction: column;
+      }
+
+      .items-center {
+        align-items: center;
+      }
+
+      .justify-between {
+        justify-content: space-between;
+      }
+
+      .justify-center {
+        justify-content: center;
+      }
+
+      .gap-4 {
+        gap: 16px;
+      }
+
+      .gap-3 {
+        gap: 12px;
+      }
+
+      .gap-2 {
+        gap: 8px;
+      }
+
+      .h-20 {
+        height: 80px;
+      }
+
+      .mx-auto {
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .w-full {
+        width: 100%;
+      }
+
+      .inline-block {
+        display: inline-block;
+      }
+
+      .rounded-full {
+        border-radius: 9999px;
+      }
+
+      .rounded-lg {
+        border-radius: 8px;
+      }
+
+      .border {
+        border-width: 1px;
+      }
+
+      .border-b {
+        border-bottom-width: 1px;
+      }
+
+      .transition-colors {
+        transition-property: color, background-color, border-color;
+        transition-duration: 160ms;
+        transition-timing-function: ease;
+      }
+
+      .hover\:text-primary:hover {
+        color: #0d631b;
+      }
+
+      .text-xs {
+        font-size: 12px;
+        line-height: 1.2;
+      }
+
+      .font-body-md {
+        font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      }
+
+      .font-display-lg {
+        font-family: Newsreader, Georgia, "Times New Roman", Times, serif;
+      }
+
+      .text-label-md {
+        font-size: 14px;
+        line-height: 1.2;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+      }
+
+      .text-body-lg {
+        font-size: 18px;
+        line-height: 1.6;
+        font-weight: 400;
+      }
+
+      .home-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      @media (min-width: 640px) {
+        .home-actions {
+          flex-direction: row;
+        }
+      }
+
+      .max-w-container-max {
+        max-width: 1280px;
+      }
+
+      .px-margin-page {
+        padding-left: 40px;
+        padding-right: 40px;
+      }
+
+      @media (max-width: 640px) {
+        .px-margin-page {
+          padding-left: 16px;
+          padding-right: 16px;
+        }
+
+        .gap-gutter {
+          gap: 16px;
+        }
+      }
+
+      .gap-gutter {
+        gap: 24px;
+      }
+
+      .gap-stack-sm {
+        gap: 12px;
+      }
+
+      .gap-stack-md {
+        gap: 24px;
+      }
+
+      .gap-stack-lg {
+        gap: 48px;
+      }
+
+      .mt-stack-sm {
+        margin-top: 12px;
+      }
+
+      .mt-stack-md {
+        margin-top: 24px;
+      }
+
+      .mt-stack-lg {
+        margin-top: 48px;
+      }
+
+      .mb-stack-sm {
+        margin-bottom: 12px;
+      }
+
+      .mb-stack-md {
+        margin-bottom: 24px;
+      }
+
+      .mb-stack-lg {
+        margin-bottom: 48px;
+      }
+
+      .ml-stack-sm {
+        margin-left: 12px;
+      }
+
+      .ml-stack-md {
+        margin-left: 24px;
+      }
+
+      .ml-stack-lg {
+        margin-left: 48px;
+      }
+
+      .pt-stack-sm {
+        padding-top: 12px;
+      }
+
+      .pt-stack-md {
+        padding-top: 24px;
+      }
+
+      .pt-stack-lg {
+        padding-top: 48px;
+      }
+
+      .pb-stack-sm {
+        padding-bottom: 12px;
+      }
+
+      .pb-stack-md {
+        padding-bottom: 24px;
+      }
+
+      .pb-stack-lg {
+        padding-bottom: 48px;
+      }
+
+      .py-stack-sm {
+        padding-top: 12px;
+        padding-bottom: 12px;
+      }
+
+      .py-stack-md {
+        padding-top: 24px;
+        padding-bottom: 24px;
+      }
+
+      .py-stack-lg {
+        padding-top: 48px;
+        padding-bottom: 48px;
+      }
+
+      .space-y-stack-sm > :not([hidden]) ~ :not([hidden]) {
+        margin-top: 12px;
+      }
+
+      .space-y-stack-md > :not([hidden]) ~ :not([hidden]) {
+        margin-top: 24px;
+      }
+
+      .space-y-stack-lg > :not([hidden]) ~ :not([hidden]) {
+        margin-top: 48px;
+      }
+
+      :root {
+        --rook-primary: #0d631b;
+        --rook-on-primary: #ffffff;
+        --rook-secondary-container: #c9e7ca;
+        --rook-on-secondary-container: #4e6952;
+        --rook-surface: #f8faf6;
+        --rook-surface-container-low: #f2f4f0;
+        --rook-surface-container-lowest: #ffffff;
+        --rook-outline-variant: #bfcaba;
+        --rook-on-surface: #191c1a;
+        --rook-on-surface-variant: #40493d;
+        --rook-outline: #707a6c;
+      }
+
+      .bg-primary {
+        background-image: linear-gradient(180deg, #11812a 0%, var(--rook-primary) 100%);
+      }
+
+      .text-primary {
+        color: var(--rook-primary);
+      }
+
+      .border-primary {
+        border-color: var(--rook-primary);
+      }
+
+      .text-on-primary {
+        color: var(--rook-on-primary);
+      }
+
+      .bg-secondary-container {
+        background-color: var(--rook-secondary-container);
+      }
+
+      .text-on-secondary-container {
+        color: var(--rook-on-secondary-container);
+      }
+
+      .bg-surface {
+        background-color: var(--rook-surface);
+      }
+
+      .bg-surface-container-low {
+        background-color: var(--rook-surface-container-low);
+      }
+
+      .bg-surface-container-lowest {
+        background-color: var(--rook-surface-container-lowest);
+      }
+
+      .border-outline-variant {
+        border-color: var(--rook-outline-variant);
+      }
+
+      .text-on-surface {
+        color: var(--rook-on-surface);
+      }
+
+      .text-on-surface-variant {
+        color: var(--rook-on-surface-variant);
+      }
+
+      .text-outline {
+        color: var(--rook-outline);
+      }
+
+      .bg-surface\/80 {
+        background-color: rgba(248, 250, 246, 0.8);
+      }
+
+      .border-outline-variant\/30 {
+        border-color: rgba(191, 202, 186, 0.3);
+      }
+
+      .border-outline-variant\/20 {
+        border-color: rgba(191, 202, 186, 0.2);
+      }
+
+      .hover\:bg-primary\/5:hover {
+        background-color: rgba(13, 99, 27, 0.05);
+      }
+
+      .shadow-primary\/10 {
+        --tw-shadow-color: rgba(13, 99, 27, 0.1);
+      }
+
+      a.bg-primary,
+      button.bg-primary {
+        box-shadow: 0 22px 40px -26px rgba(13, 99, 27, 0.6);
+        transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
+      }
+
+      a.bg-primary:hover,
+      button.bg-primary:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.02);
+      }
+
+      a.bg-primary:active,
+      button.bg-primary:active {
+        transform: translateY(0);
+        filter: brightness(0.98);
+      }
+
+      a.border-primary,
+      button.border-primary {
+        border-width: 1px;
+        transition: transform 160ms ease, border-color 160ms ease, background-color 160ms ease;
+      }
+
+      a.border-primary:hover,
+      button.border-primary:hover {
+        transform: translateY(-1px);
+        background-color: rgba(13, 99, 27, 0.04);
+      }
+
+      a.border-primary:active,
+      button.border-primary:active {
+        transform: translateY(0);
+      }
+
+      :focus-visible {
+        outline: 2px solid rgba(13, 99, 27, 0.45);
+        outline-offset: 2px;
+      }
+    </style>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" />
+    </noscript>
     <title>Rook</title>
   </head>
   <body class="bg-background font-body-md text-on-background antialiased">
-    <header class="sticky top-0 z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant/30">
-      <div class="max-w-container-max mx-auto px-margin-page h-16 flex items-center justify-between gap-4">
-        <a class="font-display-lg text-headline-md text-primary" href="#/home" data-nav="/home">Rook</a>
+    <header class="sticky top-0 z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 soft-shadow">
+      <div class="max-w-container-max mx-auto px-margin-page h-20 flex items-center justify-between gap-4">
+        <a class="rook-brand text-primary" href="#/home" data-nav="/home">Rook</a>
         <nav class="flex items-center gap-4 text-label-md">
           <a class="text-on-surface-variant hover:text-primary transition-colors" href="#/home" data-nav="/home">Home</a>
           <a class="text-on-surface-variant hover:text-primary transition-colors" href="#/marketplace" data-nav="/marketplace">Marketplace</a>
@@ -25,13 +488,31 @@
           <a class="text-on-surface-variant hover:text-primary transition-colors" href="#/crud" data-nav="/crud" style="display:none;">CRUD</a>
         </nav>
         <div class="flex items-center gap-3">
-          <div class="text-[12px] text-on-surface-variant" id="spa-who">Guest</div>
-          <button class="px-3 py-2 rounded-lg bg-primary text-on-primary hover:opacity-90 text-[12px]" id="spa-auth" type="button">Sign in</button>
+          <div class="text-xs text-on-surface-variant" id="spa-who">Guest</div>
+          <button class="px-3 py-2 rounded-lg bg-primary text-on-primary hover:opacity-90 text-xs" id="spa-auth" type="button">Sign in</button>
         </div>
       </div>
     </header>
 
-    <div id="spa-view"></div>
+    <div id="spa-view" data-prerender="home">
+      <main style="min-height:calc(100vh - 80px);">
+        <section style="min-height:calc(100vh - 80px);background-image:url('/ui/assets/img/homebackground.webp');background-size:cover;background-position:center;display:flex;align-items:center;">
+          <div style="width:100%;min-height:calc(100vh - 80px);background:linear-gradient(90deg, rgba(10, 20, 12, 0.84) 0%, rgba(10, 20, 12, 0.60) 45%, rgba(10, 20, 12, 0.18) 100%);display:flex;align-items:center;">
+            <div class="max-w-container-max mx-auto px-margin-page" style="width:100%;padding-top:48px;padding-bottom:48px;">
+              <div style="max-width:42rem;">
+                <span class="inline-block rounded-full bg-secondary-container text-on-secondary-container text-label-md" style="padding:6px 16px;">Curated for the Soul</span>
+                <h1 class="font-display-lg text-on-primary" style="font-size:100px;line-height:1.05;margin-top:24px;">Discover Your Next Chapter</h1>
+                <p class="text-body-lg text-on-primary" style="opacity:0.9;margin-top:12px;">Browse books, post listings, and chat with sellers.</p>
+                <div class="home-actions" style="margin-top:12px;">
+                  <a class="bg-primary text-on-primary rounded-lg flex items-center justify-center gap-2 soft-shadow" style="font-size:21px;padding:20px 40px;font-weight:600;letter-spacing:0.05em;" href="#/marketplace">Explore Marketplace →</a>
+                  <a class="bg-surface-container-lowest text-primary border border-primary rounded-lg flex items-center justify-center soft-shadow" style="font-size:21px;padding:20px 40px;font-weight:600;letter-spacing:0.05em;" href="#/sellerdashboard">Start Selling</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
 
     <script type="module" src="./assets/js/spa.js"></script>
   </body>

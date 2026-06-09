@@ -104,7 +104,7 @@ const supabaseAuthRequest = async (authPath, options = {}) => {
   const base = getApiBase();
   const anon = getSupabaseAnon();
   if (!anon) {
-    throw new Error("Thiếu Supabase anon key (rook_supabase_anon).");
+    throw new Error("Missing Supabase anon key (rook_supabase_anon).");
   }
   const authBase = toSupabaseAuthBase(base);
   const url = joinUrl(authBase, authPath);
@@ -136,7 +136,7 @@ const supabaseStorageUpload = async (bucket, objectPath, file, opts = {}) => {
   const base = getApiBase();
   const anon = getSupabaseAnon();
   if (!anon) {
-    throw new Error("Thiếu Supabase anon key (rook_supabase_anon).");
+    throw new Error("Missing Supabase anon key (rook_supabase_anon).");
   }
   const storageBase = toSupabaseStorageBase(base);
   const url = joinUrl(storageBase, `object/${bucket}/${objectPath}`);
@@ -168,7 +168,7 @@ export const uploadListingImages = async (files, opts = {}) => {
   await ensureSupabaseConfigLoaded();
   const base = getApiBase();
   if (!isSupabaseRest(base)) {
-    throw new Error("Upload ảnh hiện chỉ hỗ trợ khi chạy Supabase.");
+    throw new Error("Image upload is only supported when using Supabase.");
   }
   const inputFiles = Array.from(files || []).filter(Boolean);
   if (!inputFiles.length) {
@@ -340,7 +340,7 @@ export const updateMe = async (payload) => {
     const authUser = await supabaseGetUser();
     const uid = authUser?.id;
     if (!uid) {
-      throw new Error("Cần đăng nhập để cập nhật profile.");
+      throw new Error("You must be signed in to update your profile.");
     }
     const rows = await request(`profiles?id=eq.${uid}`, { method: "PATCH", body: JSON.stringify(payload) });
     return Array.isArray(rows) ? rows[0] || null : rows;
@@ -365,6 +365,36 @@ export const getProfileSummaries = async (userIds = []) => {
 
   const results = await Promise.allSettled(ids.map((id) => request(`/users/${encodeURIComponent(id)}`, { method: "GET" })));
   return results.filter((r) => r.status === "fulfilled").map((r) => r.value);
+};
+
+export const getPublicProfile = async (userId) => {
+  const id = userId == null ? "" : String(userId).trim();
+  if (!id) {
+    return null;
+  }
+  const base = getApiBase();
+  if (isSupabaseRest(base)) {
+    const rows = await request("rpc/get_profile_summaries", { method: "POST", body: JSON.stringify({ user_ids: [id] }) });
+    return Array.isArray(rows) ? rows[0] || null : rows;
+  }
+  return request(`/users/${encodeURIComponent(id)}`, { method: "GET" });
+};
+
+export const listAvailableListingsBySeller = async (sellerId) => {
+  const sid = sellerId == null ? "" : String(sellerId).trim();
+  if (!sid) {
+    return [];
+  }
+  const base = getApiBase();
+  if (isSupabaseRest(base)) {
+    const esc = encodeURIComponent(sid);
+    return request(
+      `listings?select=*,book:books(*,category:categories(*)),images:listing_images(*)&is_active=eq.true&status=eq.available&seller_id=eq.${esc}&order=id.desc`,
+      { method: "GET" }
+    );
+  }
+  const all = await listListings();
+  return (all || []).filter((l) => String(l?.seller_id) === sid && String(l?.status || "") === "available");
 };
 
 export const listBooks = async (opts = {}) => {
@@ -399,13 +429,13 @@ export const createBook = async (payload) => {
     } catch (e) {
       if (e?.status === 401) {
         clearToken();
-        throw new Error("Phiên đăng nhập Supabase không hợp lệ. Vui lòng Sign out và Sign in lại.");
+        throw new Error("Invalid Supabase session. Please sign out and sign in again.");
       }
       throw e;
     }
     const uid = authUser?.id || null;
     if (!uid) {
-      throw new Error("Bạn cần đăng nhập Supabase trước khi đăng ký sách.");
+      throw new Error("You must be signed in to Supabase before registering a book.");
     }
 
     let body = { ...(payload || {}) };
@@ -424,7 +454,7 @@ export const createBook = async (payload) => {
     if (last?.id) {
       return last;
     }
-    throw new Error("Tạo sách thất bại. Vui lòng kiểm tra Supabase schema/policies (books.created_by + RLS).");
+    throw new Error("Failed to create book. Please verify Supabase schema/policies (books.created_by + RLS).");
   }
   return request("/books", {
     method: "POST",
@@ -485,13 +515,13 @@ export const createCategory = async (payload) => {
     } catch (e) {
       if (e?.status === 401) {
         clearToken();
-        throw new Error("Phiên đăng nhập Supabase không hợp lệ. Vui lòng Sign out và Sign in lại.");
+        throw new Error("Invalid Supabase session. Please sign out and sign in again.");
       }
       throw e;
     }
     const uid = authUser?.id || null;
     if (!uid) {
-      throw new Error("Bạn cần đăng nhập Supabase trước khi đăng ký category.");
+      throw new Error("You must be signed in to Supabase before registering a category.");
     }
 
     let body = { ...(payload || {}) };
@@ -510,10 +540,10 @@ export const createCategory = async (payload) => {
       if (last?.id) {
         return last;
       }
-      throw new Error("Tạo category thất bại. Vui lòng kiểm tra Supabase schema/policies (categories.created_by + RLS).");
+      throw new Error("Failed to create category. Please verify Supabase schema/policies (categories.created_by + RLS).");
     } catch (e) {
       if (e?.data?.code === "PGRST204") {
-        throw new Error("Supabase chưa có cột categories.created_by (schema cache chưa update). Chạy SQL trong database/supabase_setup.md để add columns, sau đó Reload schema cache / Restart API trên Supabase.");
+        throw new Error("Supabase is missing categories.created_by (schema cache not updated). Run the SQL in database/supabase_setup.md to add columns, then reload the schema cache / restart the Supabase API.");
       }
       throw e;
     }
@@ -646,7 +676,7 @@ export const createListing = async (payload) => {
   if (isSupabaseRest(base)) {
     const user = await me();
     if (!user?.id) {
-      throw new Error("Cần đăng nhập để tạo listing.");
+      throw new Error("You must be signed in to create a listing.");
     }
     const listingPayload = {
       book_id: payload.book_id,
@@ -680,7 +710,7 @@ export const createListing = async (payload) => {
 export const updateListing = async (listingId, payload) => {
   const id = Number(listingId);
   if (!Number.isFinite(id)) {
-    throw new Error("listing_id không hợp lệ.");
+    throw new Error("Invalid listing_id.");
   }
   const base = getApiBase();
   if (isSupabaseRest(base)) {
@@ -693,7 +723,7 @@ export const updateListing = async (listingId, payload) => {
 export const replaceListingImages = async (listingId, urls = []) => {
   const id = Number(listingId);
   if (!Number.isFinite(id)) {
-    throw new Error("listing_id không hợp lệ.");
+    throw new Error("Invalid listing_id.");
   }
   const clean = (urls || []).map((u) => String(u || "").trim()).filter(Boolean);
   const base = getApiBase();
@@ -711,7 +741,7 @@ export const replaceListingImages = async (listingId, urls = []) => {
 export const markListingSold = async (listingId) => {
   const id = Number(listingId);
   if (!Number.isFinite(id)) {
-    throw new Error("listing_id không hợp lệ.");
+    throw new Error("Invalid listing_id.");
   }
   const base = getApiBase();
   if (isSupabaseRest(base)) {
@@ -739,7 +769,7 @@ export const sendMessage = async (payload) => {
   if (isSupabaseRest(base)) {
     const user = await me();
     if (!user?.id) {
-      throw new Error("Cần đăng nhập để gửi tin nhắn.");
+      throw new Error("You must be signed in to send messages.");
     }
     const msgPayload = {
       listing_id: payload.listing_id ?? null,

@@ -3,6 +3,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 import os
+from starlette.middleware.gzip import GZipMiddleware
 from .db import Base, engine, ensure_schema_migrations
 from .routers import auth, books, listings, users, categories, messages
 
@@ -71,6 +72,8 @@ app = FastAPI(
     },
 )
 
+app.add_middleware(GZipMiddleware, minimum_size=500)
+
 candidate_frontend_dirs = [
     Path(__file__).resolve().parents[2] / "frontend",
     Path(__file__).resolve().parents[1] / "frontend",
@@ -78,6 +81,25 @@ candidate_frontend_dirs = [
 frontend_dir = next((p for p in candidate_frontend_dirs if p.exists()), None)
 if frontend_dir:
     app.mount("/ui", StaticFiles(directory=str(frontend_dir), html=True), name="ui")
+
+@app.middleware("http")
+async def add_static_cache_headers(request, call_next):
+    resp = await call_next(request)
+    path = request.url.path or ""
+    if resp.status_code != 200:
+        return resp
+
+    if path.startswith("/ui/assets/"):
+        if "cache-control" not in resp.headers:
+            resp.headers["Cache-Control"] = "public, max-age=3600"
+        return resp
+
+    if path == "/ui/" or path.startswith("/ui/pages/"):
+        if "cache-control" not in resp.headers:
+            resp.headers["Cache-Control"] = "no-cache"
+        return resp
+
+    return resp
 
 @app.get("/", include_in_schema=False)
 def root():

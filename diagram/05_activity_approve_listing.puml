@@ -1,0 +1,31 @@
+@startuml
+skinparam shadowing false
+
+start
+
+:Seller creates listing;
+:System sets is_approved = false;
+:Listing status = Pending;
+
+:Admin reviews listing;
+if (Approve?) then (yes)
+  :Set is_approved = true;
+  :Listing becomes Active;
+  :Listing appears in Marketplace;
+else (no)
+  :Keep Pending or Reject;
+  stop
+endif
+
+:Buyer opens listing and messages seller;
+:Seller and buyer exchange messages;
+
+if (Item sold?) then (yes)
+  :Seller marks sold;
+  :System sets sold_at timestamp;
+  :Listing no longer active;
+else (no)
+endif
+
+stop
+@enduml

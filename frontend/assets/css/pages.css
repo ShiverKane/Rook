@@ -9,3 +9,43 @@
 .reading-list-divider {
   border-bottom: 1px solid #e8f5e9;
 }
+
+.marketplace-card {
+  height: 420px;
+  display: flex;
+  flex-direction: column;
+}
+
+.marketplace-card__body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.marketplace-card__title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.marketplace-card__author {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+}
+
+.marketplace-card__row {
+  margin-top: auto !important;
+}
+
+.marketplace-card {
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.marketplace-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 26px 40px -24px rgba(13, 99, 27, 0.22);
+  border-color: rgba(13, 99, 27, 0.18);
+}

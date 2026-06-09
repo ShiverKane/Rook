@@ -2,6 +2,46 @@ import { clearToken, getApiBaseOverride, getSupabaseAnon, getToken, setApiBaseOv
 import { me, listBooks, createBook, updateBook, deleteBook, listCategories, createCategory, updateCategory, deleteCategory } from "./api.js";
 import { qs, setStatus, setText } from "./ui.js";
 
+const initialHomeHtml = (() => {
+  const mount = document.querySelector("#spa-view");
+  if (!mount) {
+    return null;
+  }
+  const prerender = mount.getAttribute("data-prerender") || "";
+  if (prerender !== "home") {
+    return null;
+  }
+  return mount.innerHTML;
+})();
+
+let materialSymbolsLoaded = false;
+const ensureMaterialSymbols = () => {
+  if (materialSymbolsLoaded) {
+    return;
+  }
+  const existing = document.querySelector('link[data-material-symbols="1"]');
+  if (existing) {
+    materialSymbolsLoaded = true;
+    return;
+  }
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap";
+  link.setAttribute("data-material-symbols", "1");
+  document.head.appendChild(link);
+  materialSymbolsLoaded = true;
+};
+
+const maybeLoadMaterialSymbols = (root) => {
+  if (materialSymbolsLoaded) {
+    return;
+  }
+  const r = root && root.querySelector ? root : document;
+  if (r.querySelector(".material-symbols-outlined")) {
+    ensureMaterialSymbols();
+  }
+};
+
 const bootstrapConfig = async () => {
   try {
     const hasBase = Boolean(getApiBaseOverride());
@@ -76,7 +116,7 @@ const stripScripts = (root) => {
 const loadPageBody = async (relPath) => {
   const resp = await fetch(relPath, { cache: "no-cache" });
   if (!resp.ok) {
-    throw new Error(`Không tải được ${relPath}`);
+    throw new Error(`Couldn't load ${relPath}`);
   }
   const html = await resp.text();
   const doc = new DOMParser().parseFromString(html, "text/html");
@@ -152,7 +192,7 @@ const renderCrud = async (mount) => {
       <div class="flex items-center justify-between gap-4">
         <div>
           <h1 class="font-display-lg text-headline-lg text-on-background">Admin CRUD</h1>
-          <p class="text-on-surface-variant mt-2">Quản lý categories và books.</p>
+          <p class="text-on-surface-variant mt-2">Manage categories and books.</p>
         </div>
         <div class="flex items-center gap-2">
           <button id="crud-refresh" class="px-4 py-2 rounded-lg bg-surface-container-low border border-outline-variant/30 hover:opacity-90">Refresh</button>
@@ -168,7 +208,7 @@ const renderCrud = async (mount) => {
           </div>
           <div class="p-6 space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <input id="cat-id" class="bg-surface-container-low border border-outline-variant/30 rounded-lg px-4 py-3" placeholder="id (để trống = create)" />
+              <input id="cat-id" class="bg-surface-container-low border border-outline-variant/30 rounded-lg px-4 py-3" placeholder="id (blank = create)" />
               <input id="cat-name" class="bg-surface-container-low border border-outline-variant/30 rounded-lg px-4 py-3" placeholder="name" />
               <input id="cat-desc" class="bg-surface-container-low border border-outline-variant/30 rounded-lg px-4 py-3" placeholder="description" />
             </div>
@@ -199,7 +239,7 @@ const renderCrud = async (mount) => {
           </div>
           <div class="p-6 space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <input id="book-id" class="bg-surface-container-low border border-outline-variant/30 rounded-lg px-4 py-3" placeholder="id (để trống = create)" />
+              <input id="book-id" class="bg-surface-container-low border border-outline-variant/30 rounded-lg px-4 py-3" placeholder="id (blank = create)" />
               <select id="book-category" class="bg-surface-container-low border border-outline-variant/30 rounded-lg px-4 py-3">
                 <option value="">category_id (optional)</option>
               </select>
@@ -281,7 +321,7 @@ const renderCrud = async (mount) => {
     try {
       const user = await me();
       if (!user || user.role !== "admin") {
-        setStatus(status, "Chỉ admin mới dùng được trang CRUD.", "error");
+        setStatus(status, "Only admins can access this CRUD page.", "error");
         return;
       }
       const [categories, books] = await Promise.all([listCategories(), listBooks()]);
@@ -326,7 +366,7 @@ const renderCrud = async (mount) => {
         }
       }
     } catch (e) {
-      setStatus(status, e.message || "Không tải được dữ liệu CRUD", "error");
+      setStatus(status, e.message || "Couldn't load CRUD data.", "error");
     }
   };
 
@@ -360,7 +400,7 @@ const renderCrud = async (mount) => {
         description: (catDesc?.value || "").trim() || null
       };
       if (!payload.name) {
-        setStatus(status, "Category name không được trống.", "error");
+        setStatus(status, "Category name is required.", "error");
         return;
       }
       if (id) {
@@ -370,9 +410,9 @@ const renderCrud = async (mount) => {
       }
       clearCategoryForm();
       await loadAll();
-      setStatus(status, "Đã lưu category.", "success");
+      setStatus(status, "Category saved.", "success");
     } catch (e) {
-      setStatus(status, e.message || "Lưu category thất bại", "error");
+      setStatus(status, e.message || "Failed to save category.", "error");
     } finally {
       catSave.disabled = false;
     }
@@ -392,7 +432,7 @@ const renderCrud = async (mount) => {
         category_id: bookCategory?.value ? safeNumber(bookCategory.value) : null
       };
       if (!payload.title || !payload.author) {
-        setStatus(status, "Book cần có title và author.", "error");
+        setStatus(status, "Book title and author are required.", "error");
         return;
       }
       if (id) {
@@ -402,9 +442,9 @@ const renderCrud = async (mount) => {
       }
       clearBookForm();
       await loadAll();
-      setStatus(status, "Đã lưu book.", "success");
+      setStatus(status, "Book saved.", "success");
     } catch (e) {
-      setStatus(status, e.message || "Lưu book thất bại", "error");
+      setStatus(status, e.message || "Failed to save book.", "error");
     } finally {
       bookSave.disabled = false;
     }
@@ -431,7 +471,7 @@ const renderCrud = async (mount) => {
           if (catDesc) catDesc.value = c.description || "";
         }
       } catch (e) {
-        setStatus(status, e.message || "Không load được category", "error");
+        setStatus(status, e.message || "Couldn't load category.", "error");
       }
       return;
     }
@@ -444,9 +484,9 @@ const renderCrud = async (mount) => {
       try {
         await deleteCategory(Number(delCat));
         await loadAll();
-        setStatus(status, "Đã xóa category.", "success");
+        setStatus(status, "Category deleted.", "success");
       } catch (e) {
-        setStatus(status, e.message || "Xóa category thất bại", "error");
+        setStatus(status, e.message || "Failed to delete category.", "error");
       }
       return;
     }
@@ -466,7 +506,7 @@ const renderCrud = async (mount) => {
           if (bookCategory) bookCategory.value = b.category_id ? `${b.category_id}` : "";
         }
       } catch (e) {
-        setStatus(status, e.message || "Không load được book", "error");
+        setStatus(status, e.message || "Couldn't load book.", "error");
       }
       return;
     }
@@ -479,9 +519,9 @@ const renderCrud = async (mount) => {
       try {
         await deleteBook(Number(delBook));
         await loadAll();
-        setStatus(status, "Đã xóa book.", "success");
+        setStatus(status, "Book deleted.", "success");
       } catch (e) {
-        setStatus(status, e.message || "Xóa book thất bại", "error");
+        setStatus(status, e.message || "Failed to delete book.", "error");
       }
     }
   });
@@ -496,11 +536,32 @@ const routes = {
   "/signup": { type: "html", html: "./pages/signin.html", module: "./pages/signin.js", title: "Sign Up" },
   "/profile": { type: "html", html: "./pages/profile.html", module: "./pages/profile.js", title: "Profile" },
   "/marketplace": { type: "html", html: "./pages/marketplace.html", module: "./pages/marketplace.js", title: "Marketplace" },
+  "/listing": { type: "html", html: "./pages/listing.html", module: "./pages/listing.js", title: "Listing" },
   "/sellerdashboard": { type: "html", html: "./pages/sellerdashboard.html", module: "./pages/sellerdashboard.js", title: "Seller Dashboard" },
   "/managelisting": { type: "html", html: "./pages/managelisting.html", module: "./pages/managelisting.js?v=7", title: "Manage Listing" },
   "/messages": { type: "html", html: "./pages/messages.html", module: "./pages/messages.js", title: "Messages" },
   "/admin-dashboard": { type: "html", html: "./pages/admin-dashboard.html", module: "./pages/admin-dashboard.js", title: "Admin Dashboard" },
   "/crud": { type: "render", render: renderCrud, title: "Admin CRUD" }
+};
+
+const scheduleTailwindRefresh = () => {
+  const tw = window.tailwind;
+  if (!tw || typeof tw.refresh !== "function") {
+    return;
+  }
+  const run = () => {
+    try {
+      const out = tw.refresh();
+      if (out && typeof out.then === "function") {
+        out.catch(() => {});
+      }
+    } catch {}
+  };
+  if (typeof requestIdleCallback === "function") {
+    requestIdleCallback(run, { timeout: 1500 });
+    return;
+  }
+  setTimeout(run, 1);
 };
 
 const handleRoute = async () => {
@@ -519,8 +580,16 @@ const handleRoute = async () => {
 
   document.title = def.title ? `Rook • ${def.title}` : "Rook";
 
+  if (def.type === "html" && routePath === "/home" && initialHomeHtml) {
+    mount.innerHTML = initialHomeHtml;
+    maybeLoadMaterialSymbols(mount);
+    return;
+  }
+
   if (def.type === "render") {
     await def.render(mount);
+    maybeLoadMaterialSymbols(mount);
+    scheduleTailwindRefresh();
     return;
   }
 
@@ -534,10 +603,10 @@ const handleRoute = async () => {
     mount.innerHTML = `
       <main class="max-w-container-max mx-auto px-margin-page py-stack-lg">
         <div class="bg-surface-container-lowest border border-outline-variant/20 rounded-xl p-6">
-          <div class="font-headline-md text-headline-md text-on-surface">Không load được view</div>
+          <div class="font-headline-md text-headline-md text-on-surface">Couldn't load view</div>
           <div class="text-on-surface-variant mt-2">${e.message || ""}</div>
           <div class="mt-4">
-            <a class="text-primary hover:underline" href="./pages/home.html">Mở bản multi-page</a>
+            <a class="text-primary hover:underline" href="./pages/home.html">Open multi-page version</a>
           </div>
         </div>
       </main>
@@ -551,6 +620,8 @@ const handleRoute = async () => {
       await mod.init({ navigate, route: routePath, fullRoute, query });
     }
   }
+  maybeLoadMaterialSymbols(mount);
+  scheduleTailwindRefresh();
 };
 
 const start = () => {

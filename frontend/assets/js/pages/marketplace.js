@@ -7,33 +7,48 @@ const render = (items, navigate) => {
     return;
   }
   grid.innerHTML = "";
-  for (const it of items) {
+  for (let i = 0; i < items.length; i++) {
+    const it = items[i];
     const title = it.book?.title || `Book #${it.book_id}`;
     const author = it.book?.author || "";
     const img = it.images?.[0]?.url || "";
     const card = document.createElement("article");
-    card.className = "bg-surface-container-lowest border border-outline-variant/20 rounded-xl overflow-hidden soft-shadow";
+    card.className = "marketplace-card bg-surface-container-lowest border border-outline-variant/20 rounded-xl overflow-hidden soft-shadow";
+    card.style.cursor = "pointer";
+    card.addEventListener("click", () => {
+      if (!it?.id) return;
+      if (navigate) {
+        navigate(`/listing?id=${it.id}`);
+        return;
+      }
+      location.href = `./listing.html?id=${it.id}`;
+    });
     const cover = document.createElement("div");
-    cover.className = "h-48 bg-surface-container-low flex items-center justify-center text-outline overflow-hidden";
+    cover.className = "marketplace-card__cover h-48 bg-surface-container-low flex items-center justify-center text-outline overflow-hidden";
     if (img) {
       const image = document.createElement("img");
       image.src = img;
       image.alt = title;
       image.className = "w-full h-full object-cover";
+      image.loading = i < 3 ? "eager" : "lazy";
+      image.decoding = "async";
+      if (i < 3) {
+        image.fetchPriority = "high";
+      }
       cover.appendChild(image);
     } else {
       cover.textContent = "No image";
     }
     const body = document.createElement("div");
-    body.className = "p-6";
+    body.className = "marketplace-card__body p-6";
     const h = document.createElement("div");
-    h.className = "font-headline-md text-headline-md text-on-surface";
+    h.className = "marketplace-card__title font-headline-md text-headline-md text-on-surface";
     setText(h, title);
     const a = document.createElement("div");
-    a.className = "text-on-surface-variant mt-1";
+    a.className = "marketplace-card__author text-on-surface-variant mt-1";
     setText(a, author);
     const row = document.createElement("div");
-    row.className = "mt-4 flex justify-between items-center";
+    row.className = "marketplace-card__row mt-4 flex justify-between items-center";
     const price = document.createElement("div");
     price.className = "font-bold text-primary";
     setText(price, fmtVnd(it.price));
@@ -43,6 +58,7 @@ const render = (items, navigate) => {
       link.href = "#/messages";
       link.addEventListener("click", (ev) => {
         ev.preventDefault();
+        ev.stopPropagation();
         try {
           if (it?.seller_id) {
             localStorage.setItem("rook_msg_to", String(it.seller_id));
@@ -55,7 +71,8 @@ const render = (items, navigate) => {
       });
     } else {
       link.href = "./messages.html";
-      link.addEventListener("click", () => {
+      link.addEventListener("click", (ev) => {
+        ev.stopPropagation();
         try {
           if (it?.seller_id) {
             localStorage.setItem("rook_msg_to", String(it.seller_id));
@@ -158,7 +175,7 @@ export const init = async (opts = {}) => {
   } catch (e) {
     if (status) {
       status.style.display = "block";
-      status.textContent = e.message || "Không tải được listings";
+      status.textContent = e.message || "Couldn't load listings.";
       status.className = "text-error text-[12px] mt-3";
     }
   }

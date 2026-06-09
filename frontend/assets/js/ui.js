@@ -28,7 +28,7 @@ export const fmtDateTime = (iso) => {
   if (Number.isNaN(d.getTime())) {
     return "";
   }
-  return d.toLocaleString("vi-VN");
+  return d.toLocaleString("en-US");
 };
 
 export const setStatus = (el, message, kind = "info") => {

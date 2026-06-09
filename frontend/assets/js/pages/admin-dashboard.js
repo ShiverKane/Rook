@@ -181,7 +181,7 @@ export const init = async (opts = {}) => {
   try {
     const user = await me();
     if (!user || user.role !== "admin") {
-      setStatus(status, "Bạn không có quyền truy cập trang này.", "error");
+      setStatus(status, "You don't have permission to access this page.", "error");
       return;
     }
     const [users, locked, listings, pendingCategories, pendingBooks, pendingListings] = await Promise.all([
@@ -249,7 +249,7 @@ export const init = async (opts = {}) => {
       location.href = "./signin.html";
       return;
     }
-    setStatus(status, e.message || "Không tải được admin data", "error");
+    setStatus(status, e.message || "Couldn't load admin data.", "error");
   }
 };
 

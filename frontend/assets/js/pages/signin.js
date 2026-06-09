@@ -66,19 +66,19 @@ export const init = (opts = {}) => {
       const emailValue = email.value.trim();
       const passwordValue = password.value;
       if (!emailValue) {
-        throw new Error("Vui lòng nhập email.");
+        throw new Error("Please enter your email.");
       }
       if (!passwordValue) {
-        throw new Error("Vui lòng nhập mật khẩu.");
+        throw new Error("Please enter your password.");
       }
 
       if (mode() === "signup") {
         const confirmValue = confirmPassword?.value || "";
         if (!confirmValue) {
-          throw new Error("Vui lòng xác nhận mật khẩu.");
+          throw new Error("Please confirm your password.");
         }
         if (passwordValue !== confirmValue) {
-          throw new Error("Mật khẩu xác nhận không khớp.");
+          throw new Error("Passwords do not match.");
         }
         const data = await signup(emailValue, passwordValue);
         if (data?.access_token) {
@@ -92,10 +92,10 @@ export const init = (opts = {}) => {
               await updateMe(payload);
             }
           } catch (err) {
-            setStatus(status, err?.message || "Đăng ký thành công nhưng lưu profile thất bại.", "error");
+            setStatus(status, err?.message || "Sign up succeeded, but saving profile failed.", "error");
           }
           if (!status?.textContent) {
-            setStatus(status, "Đăng ký thành công", "success");
+            setStatus(status, "Sign up successful.", "success");
           }
           setTimeout(() => {
             if (navigate) {
@@ -118,10 +118,10 @@ export const init = (opts = {}) => {
                   await updateMe(payload);
                 }
               } catch (err) {
-                setStatus(status, err?.message || "Đăng ký thành công nhưng lưu profile thất bại.", "error");
+                setStatus(status, err?.message || "Sign up succeeded, but saving profile failed.", "error");
               }
               if (!status?.textContent) {
-                setStatus(status, "Đăng ký thành công", "success");
+                setStatus(status, "Sign up successful.", "success");
               }
               setTimeout(() => {
                 if (navigate) {
@@ -131,11 +131,11 @@ export const init = (opts = {}) => {
                 location.href = "./profile.html";
               }, 300);
             } else {
-              throw new Error("Không thể đăng nhập sau khi đăng ký.");
+              throw new Error("Couldn't sign in after sign up.");
             }
           } catch (err) {
-            const raw = err?.message || "Đăng ký thành công nhưng chưa thể đăng nhập.";
-            const msg = /confirm/i.test(raw) ? "Email chưa được xác nhận. Với đồ án, hãy tắt Confirm email trong Supabase Auth settings để đăng ký là dùng được ngay." : raw;
+            const raw = err?.message || "Sign up succeeded, but couldn't sign in yet.";
+            const msg = /confirm/i.test(raw) ? "Your email is not confirmed. For this project, disable email confirmation in Supabase Auth settings to allow immediate sign-in." : raw;
             setStatus(status, msg, "error");
             setMode("signin", { clearStatus: false });
           }
@@ -143,7 +143,7 @@ export const init = (opts = {}) => {
       } else {
         const data = await login(emailValue, passwordValue);
         setToken(data.access_token);
-        setStatus(status, "Đăng nhập thành công", "success");
+        setStatus(status, "Signed in.", "success");
         setTimeout(() => {
           if (navigate) {
             navigate("/profile");
@@ -153,9 +153,9 @@ export const init = (opts = {}) => {
         }, 300);
       }
     } catch (e) {
-      const raw = e?.message || "Đăng nhập thất bại";
+      const raw = e?.message || "Sign in failed.";
       const msg = /invalid path specified in request url/i.test(raw)
-        ? "Sai URL Supabase. ROOK_SUPABASE_REST_URL phải có dạng https://<project>.supabase.co/rest/v1 (hoặc bạn đã set rook_api_base sai trong localStorage)."
+        ? "Invalid Supabase URL. ROOK_SUPABASE_REST_URL must look like https://<project>.supabase.co/rest/v1 (or rook_api_base is set incorrectly in localStorage)."
         : raw;
       setStatus(status, msg, "error");
     } finally {

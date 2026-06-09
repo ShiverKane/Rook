@@ -85,7 +85,7 @@ export const init = (opts = {}) => {
     listingsBox.innerHTML = "";
     if (!selectedBook) {
       if (selectedLabel) {
-        setText(selectedLabel, "Chọn 1 sách để xem listings.");
+        setText(selectedLabel, "Select a book to view listings.");
       }
       return;
     }
@@ -96,7 +96,7 @@ export const init = (opts = {}) => {
     if (!data.length) {
       const empty = document.createElement("div");
       empty.className = "text-on-surface-variant text-[12px]";
-      empty.textContent = "Không có listing nào cho sách này (hoặc chưa được duyệt).";
+      empty.textContent = "No listings for this book (or it hasn't been approved yet).";
       listingsBox.appendChild(empty);
       return;
     }
@@ -106,6 +106,15 @@ export const init = (opts = {}) => {
       const img = it.images?.[0]?.url || "";
       const card = document.createElement("article");
       card.className = "bg-surface-container-lowest border border-outline-variant/20 rounded-xl overflow-hidden soft-shadow";
+      card.style.cursor = "pointer";
+      card.addEventListener("click", () => {
+        if (!it?.id) return;
+        if (navigate) {
+          navigate(`/listing?id=${it.id}`);
+          return;
+        }
+        location.href = `./listing.html?id=${it.id}`;
+      });
       const cover = document.createElement("div");
       cover.className = "h-40 bg-surface-container-low flex items-center justify-center text-outline overflow-hidden";
       if (img) {
@@ -137,6 +146,7 @@ export const init = (opts = {}) => {
         link.href = "#/messages";
         link.addEventListener("click", (ev) => {
           ev.preventDefault();
+          ev.stopPropagation();
           try {
             if (it?.seller_id) {
               localStorage.setItem("rook_msg_to", String(it.seller_id));
@@ -149,7 +159,8 @@ export const init = (opts = {}) => {
         });
       } else {
         link.href = "./messages.html";
-        link.addEventListener("click", () => {
+        link.addEventListener("click", (ev) => {
+          ev.stopPropagation();
           try {
             if (it?.seller_id) {
               localStorage.setItem("rook_msg_to", String(it.seller_id));
@@ -185,7 +196,7 @@ export const init = (opts = {}) => {
       listings = await listListingsByBook(selectedBook.id);
       renderListings();
     } catch (e) {
-      setStatus(status, e?.message || "Không tải được listings", "error");
+      setStatus(status, e?.message || "Couldn't load listings.", "error");
     }
   };
 
@@ -227,7 +238,7 @@ export const init = (opts = {}) => {
       renderSuggestions(items || []);
     } catch (e) {
       suggestions.innerHTML = "";
-      setStatus(status, e?.message || "Search thất bại", "error");
+      setStatus(status, e?.message || "Search failed.", "error");
     }
   }, 200);
 
@@ -252,4 +263,3 @@ export const init = (opts = {}) => {
 };
 
 document.addEventListener("DOMContentLoaded", () => init());
-
