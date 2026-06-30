@@ -1,7 +1,14 @@
-import { listCategories, listBooks, listListings } from "../api.js";
+import { listCategories, listBooks, listListings, me } from "../api.js";
 import { qs, setText, fmtVnd } from "../ui.js";
 
-const render = (items, navigate) => {
+const isOwnedByCurrentUser = (listing, currentUserId) => {
+  if (!currentUserId || listing?.seller_id == null) {
+    return false;
+  }
+  return String(listing.seller_id) === String(currentUserId);
+};
+
+const render = (items, navigate, currentUserId) => {
   const grid = qs("#marketplace-grid");
   if (!grid) {
     return;
@@ -54,36 +61,54 @@ const render = (items, navigate) => {
     setText(price, fmtVnd(it.price));
     const link = document.createElement("a");
     link.className = "px-4 py-2 bg-primary text-on-primary rounded-lg font-label-md";
-    if (navigate) {
-      link.href = "#/messages";
-      link.addEventListener("click", (ev) => {
-        ev.preventDefault();
-        ev.stopPropagation();
-        try {
-          if (it?.seller_id) {
-            localStorage.setItem("rook_msg_to", String(it.seller_id));
-          }
-          if (it?.id != null) {
-            localStorage.setItem("rook_msg_listing", String(it.id));
-          }
-        } catch {}
-        navigate("/messages");
-      });
+    const isOwner = isOwnedByCurrentUser(it, currentUserId);
+    if (isOwner) {
+      if (navigate) {
+        link.href = `#/managelisting?id=${encodeURIComponent(it.id)}`;
+        link.addEventListener("click", (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          navigate(`/managelisting?id=${encodeURIComponent(it.id)}`);
+        });
+      } else {
+        link.href = `./managelisting.html?id=${encodeURIComponent(it.id)}`;
+        link.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+        });
+      }
+      link.textContent = "Edit";
     } else {
-      link.href = "./messages.html";
-      link.addEventListener("click", (ev) => {
-        ev.stopPropagation();
-        try {
-          if (it?.seller_id) {
-            localStorage.setItem("rook_msg_to", String(it.seller_id));
-          }
-          if (it?.id != null) {
-            localStorage.setItem("rook_msg_listing", String(it.id));
-          }
-        } catch {}
-      });
+      if (navigate) {
+        link.href = "#/messages";
+        link.addEventListener("click", (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          try {
+            if (it?.seller_id) {
+              localStorage.setItem("rook_msg_to", String(it.seller_id));
+            }
+            if (it?.id != null) {
+              localStorage.setItem("rook_msg_listing", String(it.id));
+            }
+          } catch {}
+          navigate("/messages");
+        });
+      } else {
+        link.href = "./messages.html";
+        link.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          try {
+            if (it?.seller_id) {
+              localStorage.setItem("rook_msg_to", String(it.seller_id));
+            }
+            if (it?.id != null) {
+              localStorage.setItem("rook_msg_listing", String(it.id));
+            }
+          } catch {}
+        });
+      }
+      link.textContent = "Message";
     }
-    link.textContent = "Message";
     row.appendChild(price);
     row.appendChild(link);
     body.appendChild(h);
@@ -102,6 +127,12 @@ export const init = async (opts = {}) => {
   const minInput = qs("#marketplace-price-min");
   const maxInput = qs("#marketplace-price-max");
   try {
+    let currentUserId = null;
+    try {
+      const currentUser = await me();
+      currentUserId = currentUser?.id != null ? String(currentUser.id) : null;
+    } catch {}
+
     const [categories, books, listings] = await Promise.all([listCategories(), listBooks(), listListings()]);
     const bookById = new Map((books || []).map((b) => [b.id, b]));
 
@@ -162,7 +193,7 @@ export const init = async (opts = {}) => {
         }
         return getCategoryId(l) === selected;
       });
-      render(data, navigate);
+      render(data, navigate, currentUserId);
     };
 
     categorySelect?.addEventListener("change", () => filterAndRender());

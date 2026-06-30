@@ -57,12 +57,13 @@ const getListingIdForEdit = (opts) => {
 
 export const init = async (opts = {}) => {
   const navigate = typeof opts.navigate === "function" ? opts.navigate : null;
+  let currentUser = null;
   if (!requireAuth(navigate)) {
     return;
   }
   try {
-    const user = await me();
-    if (!user?.id) {
+    currentUser = await me();
+    if (!currentUser?.id) {
       clearToken();
       if (navigate) {
         navigate("/signin");
@@ -183,6 +184,9 @@ export const init = async (opts = {}) => {
       existing = await getListing(editListingId);
       if (!existing?.id) {
         throw new Error("Listing not found.");
+      }
+      if (String(existing?.seller_id || "") !== String(currentUser?.id || "")) {
+        throw new Error("You can only edit your own post.");
       }
     } catch (e) {
       setStatus(statusEl, e?.message || "Couldn't load listing for editing.", "error");
