@@ -1,0 +1,33 @@
+@startuml
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+actor User
+participant "Frontend (UI)" as FE
+participant "Supabase Auth\n/auth/v1" as SA
+participant "Supabase REST\n/rest/v1" as SR
+database "Postgres" as PG
+
+User -> FE : Open Sign in
+FE -> SA : POST /token?grant_type=password\n{email, password}
+SA -> PG : Validate user
+SA --> FE : {access_token, refresh_token}
+FE -> FE : Store tokens (localStorage)
+
+User -> FE : Open Marketplace\nClick "Message"
+FE -> FE : Save draft receiver/listing\nNavigate to Messages
+
+FE -> SR : GET /messages?select=...\nAuthorization: Bearer <token>
+SR -> PG : RLS: only sender/receiver rows
+SR --> FE : messages + related listing info
+FE --> User : Render inbox/thread
+
+User -> FE : Type message + Send
+FE -> SR : POST /messages\n{listing_id, sender_id, receiver_id, body}
+SR -> PG : Insert messages row\nRLS enforce ownership
+SR --> FE : 201 Created
+FE -> SR : GET /messages?select=...\n(refresh thread)
+SR -> PG
+SR --> FE : updated messages
+FE --> User : Show new message
+@enduml

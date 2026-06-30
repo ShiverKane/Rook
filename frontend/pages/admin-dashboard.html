@@ -64,7 +64,7 @@
           <p class="font-body-md text-body-md text-on-surface-variant mt-2">Manage users, listings, and moderation actions.</p>
           <div id="admin-status" style="display:none;"></div>
         </header>
-        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter mb-stack-lg">
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-gutter mb-stack-lg">
           <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/30 soft-shadow">
             <div class="flex items-center justify-between">
               <span class="material-symbols-outlined text-primary">group</span>
@@ -83,6 +83,14 @@
           </div>
           <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/30 soft-shadow">
             <div class="flex items-center justify-between">
+              <span class="material-symbols-outlined text-primary">pending_actions</span>
+              <span class="text-[12px] font-bold text-primary bg-primary-fixed/30 px-2 py-1 rounded">Pending</span>
+            </div>
+            <div class="mt-4 text-on-surface-variant">Pending listings</div>
+            <div class="mt-1 font-headline-md text-headline-lg text-on-surface" id="admin-pending-listings-count">0</div>
+          </div>
+          <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/30 soft-shadow">
+            <div class="flex items-center justify-between">
               <span class="material-symbols-outlined text-primary">block</span>
               <span class="text-[12px] font-bold text-primary bg-primary-fixed/30 px-2 py-1 rounded">Moderation</span>
             </div>
@@ -94,8 +102,8 @@
               <span class="material-symbols-outlined text-primary">category</span>
               <span class="text-[12px] font-bold text-primary bg-primary-fixed/30 px-2 py-1 rounded">Catalog</span>
             </div>
-            <div class="mt-4 text-on-surface-variant">Categories</div>
-            <div class="mt-1 font-headline-md text-headline-lg text-on-surface">12</div>
+            <div class="mt-4 text-on-surface-variant">Pending catalog</div>
+            <div class="mt-1 font-headline-md text-headline-lg text-on-surface"><span id="admin-pending-categories-count">0</span> / <span id="admin-pending-books-count">0</span></div>
           </div>
         </section>
         <section class="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
@@ -120,34 +128,50 @@
           </div>
           <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 soft-shadow overflow-hidden">
             <div class="p-8 border-b border-outline-variant/30 flex justify-between items-center">
-              <h2 class="font-headline-md text-headline-md text-on-surface">Listings</h2>
-              <a class="text-primary font-label-md text-label-md hover:underline" href="#">View all</a>
+              <h2 class="font-headline-md text-headline-md text-on-surface">Pending approvals</h2>
             </div>
             <div class="overflow-x-auto">
+              <div class="p-8 border-b border-outline-variant/30">
+                <div class="font-label-md text-label-md text-on-surface">Pending categories</div>
+                <div class="text-on-surface-variant text-[12px] mt-1">Approve to make this category available to everyone.</div>
+              </div>
               <table class="w-full text-left">
                 <thead>
                   <tr class="text-on-surface-variant text-label-md bg-surface-container-low/50">
-                    <th class="px-8 py-4 font-semibold uppercase tracking-wider">Book</th>
-                    <th class="px-8 py-4 font-semibold uppercase tracking-wider">Seller</th>
-                    <th class="px-8 py-4 font-semibold uppercase tracking-wider">Status</th>
+                    <th class="px-8 py-4 font-semibold uppercase tracking-wider">Name</th>
+                    <th class="px-8 py-4 font-semibold uppercase tracking-wider">Description</th>
+                    <th class="px-8 py-4 font-semibold uppercase tracking-wider">Action</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-outline-variant/20">
-                  <tr class="hover:bg-surface-container-low/30 transition-colors">
-                    <td class="px-8 py-6 text-on-surface text-body-md">Tắt Đèn</td>
-                    <td class="px-8 py-6 text-on-surface-variant text-body-md">Nguyen Van An</td>
-                    <td class="px-8 py-6">
-                      <span class="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-[12px] font-bold">available</span>
-                    </td>
+                <tbody class="divide-y divide-outline-variant/20" id="admin-pending-categories-body"></tbody>
+              </table>
+              <div class="p-8 border-b border-outline-variant/30">
+                <div class="font-label-md text-label-md text-on-surface">Pending books</div>
+                <div class="text-on-surface-variant text-[12px] mt-1">Approve to make this book visible to everyone.</div>
+              </div>
+              <table class="w-full text-left">
+                <thead>
+                  <tr class="text-on-surface-variant text-label-md bg-surface-container-low/50">
+                    <th class="px-8 py-4 font-semibold uppercase tracking-wider">Title</th>
+                    <th class="px-8 py-4 font-semibold uppercase tracking-wider">Author</th>
+                    <th class="px-8 py-4 font-semibold uppercase tracking-wider">Action</th>
                   </tr>
-                  <tr class="hover:bg-surface-container-low/30 transition-colors">
-                    <td class="px-8 py-6 text-on-surface text-body-md">Ảnh Hưởng</td>
-                    <td class="px-8 py-6 text-on-surface-variant text-body-md">Tran Thi Mai</td>
-                    <td class="px-8 py-6">
-                      <span class="px-3 py-1 bg-primary-fixed text-on-primary-fixed-variant rounded-full text-[12px] font-bold">sold</span>
-                    </td>
+                </thead>
+                <tbody class="divide-y divide-outline-variant/20" id="admin-pending-books-body"></tbody>
+              </table>
+              <div class="p-8 border-b border-outline-variant/30">
+                <div class="font-label-md text-label-md text-on-surface">Pending listings</div>
+                <div class="text-on-surface-variant text-[12px] mt-1">Approve to make this listing appear in Marketplace.</div>
+              </div>
+              <table class="w-full text-left">
+                <thead>
+                  <tr class="text-on-surface-variant text-label-md bg-surface-container-low/50">
+                    <th class="px-8 py-4 font-semibold uppercase tracking-wider">Listing</th>
+                    <th class="px-8 py-4 font-semibold uppercase tracking-wider">Book</th>
+                    <th class="px-8 py-4 font-semibold uppercase tracking-wider">Action</th>
                   </tr>
-                </tbody>
+                </thead>
+                <tbody class="divide-y divide-outline-variant/20" id="admin-pending-listings-body"></tbody>
               </table>
             </div>
           </div>

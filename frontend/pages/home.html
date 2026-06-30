@@ -12,14 +12,13 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
   </head>
   <body class="bg-background text-on-background font-body-md antialiased">
-    <header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 shadow-sm">
+    <header class="sticky top-0 w-full z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 shadow-sm">
       <div class="max-w-container-max mx-auto px-margin-page flex items-center justify-between h-20">
         <a class="font-display-lg text-headline-md text-primary" href="./home.html">Curated Sanctuary</a>
         <nav class="hidden md:flex items-center gap-6 font-body-md text-label-md">
           <a class="text-primary font-bold border-b-2 border-primary pb-1" href="./home.html">Home</a>
           <a class="text-on-surface-variant hover:text-primary transition-colors" href="./marketplace.html">Marketplace</a>
           <a class="text-on-surface-variant hover:text-primary transition-colors" href="./sellerdashboard.html">Sell</a>
-          <a class="text-on-surface-variant hover:text-primary transition-colors" href="./admin-dashboard.html">Admin</a>
         </nav>
         <div class="flex items-center gap-4">
           <a class="p-2 rounded-full hover:bg-surface-container-low transition-all active:scale-95" href="./search.html">
@@ -31,33 +30,25 @@
         </div>
       </div>
     </header>
-    <main class="pt-32 pb-stack-lg max-w-container-max mx-auto px-margin-page">
-      <section class="grid grid-cols-1 md:grid-cols-2 gap-gutter items-center">
-        <div class="space-y-stack-md">
-          <span class="inline-block px-4 py-1 rounded-full bg-secondary-container text-on-secondary-container text-label-md">Curated for the Soul</span>
-          <h1 class="font-display-lg text-display-lg leading-tight text-on-surface">Discover Your Next Chapter</h1>
-          <p class="text-body-lg text-on-surface-variant">Browse books, post listings, and chat with sellers.</p>
-          <div class="flex flex-col sm:flex-row gap-4 pt-4">
-            <a class="bg-primary text-on-primary px-8 py-4 rounded-lg font-label-md hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-xl shadow-primary/10" href="./marketplace.html">
-              Explore Marketplace <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
-            </a>
-            <a class="border border-primary text-primary px-8 py-4 rounded-lg font-label-md hover:bg-primary/5 transition-all flex items-center justify-center" href="./sellerdashboard.html">
-              Start Selling
-            </a>
-          </div>
-        </div>
-        <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl soft-shadow p-8">
-          <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-full bg-secondary flex items-center justify-center text-on-secondary font-bold">R</div>
-            <div>
-              <div class="font-headline-md text-headline-md text-on-surface">Quick Links</div>
-              <div class="text-on-surface-variant text-body-md">Navigate the demo UI</div>
+    <main style="min-height:calc(100vh - 80px);">
+      <section
+        style="min-height:calc(100vh - 80px);background-image:url('/ui/assets/img/homebackground.webp');background-size:cover;background-position:center;display:flex;align-items:center;"
+      >
+        <div style="width:100%;min-height:calc(100vh - 80px);background:linear-gradient(90deg, rgba(10, 20, 12, 0.84) 0%, rgba(10, 20, 12, 0.60) 45%, rgba(10, 20, 12, 0.18) 100%);display:flex;align-items:center;">
+          <div class="max-w-container-max mx-auto px-margin-page py-stack-lg" style="width:100%;">
+            <div class="space-y-stack-md max-w-2xl">
+              <span class="inline-block px-4 py-1 rounded-full bg-secondary-container text-on-secondary-container text-label-md" >Curated for the Soul</span>
+              <h1 class="font-display-lg text-display-lg leading-tight text-on-primary" style="font-size:100px;line-height:1.05;">Discover Your Next Chapter</h1>
+              <p class="text-body-lg text-on-primary" style="opacity:0.9;margin-top:12px;">Browse books, post listings, and chat with sellers.</p>
+              <div class="flex flex-col sm:flex-row gap-4" style="margin-top:12px;">
+                <a class="bg-primary text-on-primary px-10 py-5 rounded-lg font-label-md hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-xl shadow-primary/10" style="font-size:21px;" href="./marketplace.html">
+                  Explore Marketplace <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+                </a>
+                <a class="bg-surface-container-lowest text-primary border border-primary px-10 py-5 rounded-lg font-label-md hover:opacity-95 transition-all flex items-center justify-center soft-shadow" style="font-size:21px;" href="./sellerdashboard.html">
+                  Start Selling
+                </a>
+              </div>
             </div>
-          </div>
-          <div class="mt-6 grid grid-cols-1 gap-3">
-            <a class="px-4 py-3 rounded-xl bg-surface-container-low hover:bg-surface-container-high transition-all" href="./messages.html">Messages</a>
-            <a class="px-4 py-3 rounded-xl bg-surface-container-low hover:bg-surface-container-high transition-all" href="./profile.html">Profile</a>
-            <a class="px-4 py-3 rounded-xl bg-surface-container-low hover:bg-surface-container-high transition-all" href="./managelisting.html">Create Listing</a>
           </div>
         </div>
       </section>

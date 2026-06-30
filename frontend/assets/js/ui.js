@@ -13,7 +13,11 @@ export const fmtVnd = (value) => {
   if (!Number.isFinite(num)) {
     return "";
   }
-  return new Intl.NumberFormat("vi-VN").format(num);
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+    maximumFractionDigits: 0
+  }).format(num);
 };
 
 export const fmtDateTime = (iso) => {
@@ -24,7 +28,7 @@ export const fmtDateTime = (iso) => {
   if (Number.isNaN(d.getTime())) {
     return "";
   }
-  return d.toLocaleString("vi-VN");
+  return d.toLocaleString("en-US");
 };
 
 export const setStatus = (el, message, kind = "info") => {

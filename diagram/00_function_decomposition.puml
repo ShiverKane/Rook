@@ -1,0 +1,57 @@
+@startmindmap
+skinparam shadowing false
+skinparam backgroundColor transparent
+
+* Rook\nUsed Books Marketplace System
+
+** User Management
+*** Register Account
+*** Login
+*** Logout
+*** View Profile
+*** Update Profile
+
+** Marketplace Browsing
+*** Browse Listings
+*** Search Listings
+*** Filter Listings
+**** By Category
+**** By Price
+**** By Condition
+*** View Listing Details
+
+** Listing Management
+*** Create Listing
+*** Edit Listing
+*** Delete Listing
+*** Upload Images
+*** Mark Listing as Sold
+*** Manage Own Listings
+
+** Messaging Management
+*** Start Conversation
+*** View Inbox
+*** View Conversation
+*** Send Message
+*** Receive Message
+
+** Category Management
+*** View Categories
+*** Create Category
+*** Update Category
+*** Delete Category
+
+** Book Management
+*** Add Book Information
+*** Edit Book Information
+*** View Book Information
+
+** Administration
+*** Manage Users
+**** Lock User Account
+**** Unlock User Account
+*** Manage Categories
+*** Monitor Listings
+*** Review Marketplace Activity
+
+@endmindmap

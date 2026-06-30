@@ -1,0 +1,33 @@
+@startuml
+skinparam shadowing false
+skinparam componentStyle rectangle
+
+actor "User/Guest" as U
+
+node "Browser" as B {
+  component "Rook UI\n(SPA + multi-page)\n/ui/*" as FE
+}
+
+node "Backend" as BE {
+  component "FastAPI\n(app.main)" as API
+}
+
+node "Supabase" as SB {
+  component "Auth API\n/auth/v1" as SA
+  component "PostgREST\n/rest/v1" as SR
+  component "Storage\n/storage/v1" as SS
+  database "Postgres" as PG
+}
+
+U --> B
+B --> API : GET /ui/\n(static)
+B --> API : GET /config\n(load Supabase config)
+
+B --> SA : Sign in / Sign up\n(token, refresh)
+B --> SR : CRUD data\n(categories, books,\nlistings, messages,\nlisting_images)
+B --> SS : Upload images\n(listing-images bucket)
+
+SA --> PG
+SR --> PG
+SS --> PG
+@enduml

@@ -42,19 +42,21 @@
           <div>
             <h3 class="font-headline-md text-headline-md text-primary mb-stack-md">Filters</h3>
             <label class="font-label-md text-label-md uppercase tracking-wider text-outline mb-stack-sm block">Category</label>
-            <select class="w-full bg-surface-container-low border border-outline-variant/20 rounded-lg px-4 py-3 focus:ring-1 focus:ring-primary">
-              <option>All</option>
-              <option>Fiction</option>
-              <option>Business</option>
-              <option>Science</option>
+            <select id="marketplace-category" class="w-full bg-surface-container-low border border-outline-variant/20 rounded-lg px-4 py-3 focus:ring-1 focus:ring-primary">
+              <option value="">All</option>
             </select>
           </div>
           <div class="bg-surface-container-lowest border border-outline-variant/20 rounded-xl p-6">
-            <div class="font-headline-md text-headline-md">Reading List</div>
-            <div class="mt-4 space-y-3">
-              <div class="reading-list-divider pb-3">Modern Classics</div>
-              <div class="reading-list-divider pb-3">Vietnamese Literature</div>
-              <div class="pb-1">AI & Technology</div>
+            <div class="font-headline-md text-headline-md">Price</div>
+            <div class="mt-4 grid grid-cols-2 gap-3">
+              <div>
+                <label class="text-label-md text-on-surface-variant" for="marketplace-price-min">Min</label>
+                <input id="marketplace-price-min" class="w-full mt-2 bg-surface-container-low border border-outline-variant/20 rounded-lg px-4 py-3 focus:ring-1 focus:ring-primary" placeholder="0" type="number" min="0" step="1000" />
+              </div>
+              <div>
+                <label class="text-label-md text-on-surface-variant" for="marketplace-price-max">Max</label>
+                <input id="marketplace-price-max" class="w-full mt-2 bg-surface-container-low border border-outline-variant/20 rounded-lg px-4 py-3 focus:ring-1 focus:ring-primary" placeholder="200000" type="number" min="0" step="1000" />
+              </div>
             </div>
           </div>
         </aside>

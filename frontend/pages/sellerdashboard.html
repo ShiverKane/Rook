@@ -26,12 +26,9 @@
           </nav>
         </div>
         <div class="flex items-center gap-4">
-          <button class="p-2 rounded-full hover:bg-surface-container-low transition-all active:scale-95">
+          <a class="p-2 rounded-full hover:bg-surface-container-low transition-all active:scale-95" href="./messages.html">
             <span class="material-symbols-outlined text-primary">chat</span>
-          </button>
-          <button class="p-2 rounded-full hover:bg-surface-container-low transition-all active:scale-95">
-            <span class="material-symbols-outlined text-primary">shopping_cart</span>
-          </button>
+          </a>
           <a class="p-2 rounded-full hover:bg-surface-container-low transition-all active:scale-95" href="./profile.html">
             <span class="material-symbols-outlined text-primary">account_circle</span>
           </a>
@@ -56,11 +53,6 @@
           <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all" href="#">
             <span class="material-symbols-outlined">analytics</span>
             <span class="font-label-md text-label-md">Analytics</span>
-          </a>
-          <div class="h-px bg-outline-variant/30 my-4"></div>
-          <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all" href="./admin-dashboard.html">
-            <span class="material-symbols-outlined">admin_panel_settings</span>
-            <span class="font-label-md text-label-md">Admin</span>
           </a>
         </nav>
         <div class="absolute bottom-8 left-0 right-0 px-stack-md">
@@ -92,12 +84,11 @@
           <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/30 soft-shadow">
             <div class="flex justify-between items-start mb-4">
               <div class="p-2 bg-secondary-container rounded-lg">
-                <span class="material-symbols-outlined text-on-secondary-container">trending_up</span>
+                <span class="material-symbols-outlined text-on-secondary-container">inventory_2</span>
               </div>
-              <span class="text-[12px] font-bold text-primary bg-primary-fixed/30 px-2 py-1 rounded">+12.4%</span>
             </div>
-            <p class="text-on-surface-variant font-label-md text-label-md">Total Sales</p>
-            <p class="font-headline-md text-headline-lg text-on-surface mt-1">$4,280.50</p>
+            <p class="text-on-surface-variant font-label-md text-label-md">Total Listings</p>
+            <p class="font-headline-md text-headline-lg text-on-surface mt-1"><span id="seller-total-count">0</span> Books</p>
           </div>
           <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/30 soft-shadow">
             <div class="flex justify-between items-start mb-4">
@@ -107,67 +98,6 @@
             </div>
             <p class="text-on-surface-variant font-label-md text-label-md">Active Listings</p>
             <p class="font-headline-md text-headline-lg text-on-surface mt-1"><span id="seller-active-count">0</span> Books</p>
-          </div>
-          <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/30 soft-shadow">
-            <div class="flex justify-between items-start mb-4">
-              <div class="p-2 bg-secondary-container rounded-lg">
-                <span class="material-symbols-outlined text-on-secondary-container">visibility</span>
-              </div>
-              <span class="text-[12px] font-bold text-primary bg-primary-fixed/30 px-2 py-1 rounded">+5%</span>
-            </div>
-            <p class="text-on-surface-variant font-label-md text-label-md">Page Views</p>
-            <p class="font-headline-md text-headline-lg text-on-surface mt-1">12.2k</p>
-          </div>
-          <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/30 soft-shadow">
-            <div class="flex justify-between items-start mb-4">
-              <div class="p-2 bg-secondary-container rounded-lg">
-                <span class="material-symbols-outlined text-on-secondary-container">star</span>
-              </div>
-            </div>
-            <p class="text-on-surface-variant font-label-md text-label-md">Seller Rating</p>
-            <p class="font-headline-md text-headline-lg text-on-surface mt-1">4.9 / 5.0</p>
-          </div>
-        </section>
-        <section class="grid grid-cols-1 lg:grid-cols-3 gap-gutter mb-stack-lg">
-          <div class="lg:col-span-2 bg-surface-container-lowest p-8 rounded-2xl border border-outline-variant/30 soft-shadow">
-            <div class="flex justify-between items-center mb-8">
-              <h2 class="font-headline-md text-headline-md text-on-surface">Sales Performance</h2>
-              <select class="bg-surface-container-low border-none rounded-lg text-label-md px-4 py-2 outline-none focus:ring-1 focus:ring-primary">
-                <option>Last 7 Days</option>
-                <option>Last 30 Days</option>
-                <option>This Year</option>
-              </select>
-            </div>
-            <div class="h-64 relative">
-              <div class="absolute inset-0 flex items-end justify-between px-2">
-                <div class="w-12 bg-primary/10 rounded-t-lg h-[40%]"></div>
-                <div class="w-12 bg-primary/20 rounded-t-lg h-[55%]"></div>
-                <div class="w-12 bg-primary/10 rounded-t-lg h-[35%]"></div>
-                <div class="w-12 bg-primary-container rounded-t-lg h-[80%]"></div>
-                <div class="w-12 bg-primary/15 rounded-t-lg h-[60%]"></div>
-                <div class="w-12 bg-primary/10 rounded-t-lg h-[45%]"></div>
-                <div class="w-12 bg-primary/30 rounded-t-lg h-[70%]"></div>
-              </div>
-            </div>
-            <div class="flex justify-between mt-4 text-on-surface-variant text-[12px] font-label-md px-2">
-              <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
-            </div>
-          </div>
-          <div class="bg-secondary text-on-secondary p-8 rounded-2xl flex flex-col justify-between relative overflow-hidden">
-            <div class="relative z-10">
-              <h3 class="font-headline-md text-headline-md mb-2">Inventory Health</h3>
-              <p class="text-secondary-fixed opacity-90 text-body-md">Your rare collection segment has increased by 15% this month.</p>
-            </div>
-            <div class="mt-8 relative z-10">
-              <div class="flex items-end gap-1 mb-2">
-                <span class="text-4xl font-bold">12</span>
-                <span class="text-sm pb-1 opacity-70">Low Stock Alerts</span>
-              </div>
-              <button class="w-full py-3 bg-secondary-fixed text-on-secondary-fixed rounded-xl font-label-md text-label-md mt-4 transition-all hover:opacity-90 active:scale-95">
-                Restock Inventory
-              </button>
-            </div>
-            <div class="absolute -right-12 -bottom-12 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
           </div>
         </section>
         <section class="bg-surface-container-lowest p-8 rounded-2xl border border-outline-variant/30 soft-shadow">

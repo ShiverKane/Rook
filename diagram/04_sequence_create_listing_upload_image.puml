@@ -1,0 +1,31 @@
+@startuml
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+actor Seller
+participant "Frontend (UI)" as FE
+participant "Supabase Auth\n/auth/v1" as SA
+participant "Supabase Storage\n/storage/v1" as SS
+participant "Supabase REST\n/rest/v1" as SR
+database "Postgres" as PG
+
+Seller -> FE : Open "Sell"\nFill listing form\nChoose images
+FE -> SA : GET /user\nAuthorization: Bearer <token>
+SA -> PG
+SA --> FE : {id (seller_id), email}
+
+FE -> SS : POST /object/listing-images/...\n(file bytes)\nAuthorization: Bearer <token>
+SS -> PG : Store object metadata
+SS --> FE : 200 OK\n(path/key)
+FE -> FE : Build public URL for image
+
+FE -> SR : POST /listings\n{book_id, price, condition, notes,\nis_approved=false}
+SR -> PG : Insert listings row\nRLS enforce seller_id
+SR --> FE : 201 Created\n(listing id)
+
+FE -> SR : POST /listing_images\n{listing_id, url, sort_order}
+SR -> PG : Insert listing_images row
+SR --> FE : 201 Created
+
+FE --> Seller : Listing created (pending)\nImages attached
+@enduml

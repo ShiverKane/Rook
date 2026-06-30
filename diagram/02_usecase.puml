@@ -1,0 +1,64 @@
+@startuml
+left to right direction
+skinparam shadowing false
+
+actor Guest
+actor User
+actor Seller
+actor Admin
+
+rectangle "Rook Marketplace" {
+  usecase "Browse marketplace" as UC_Browse
+  usecase "Filter by category" as UC_FilterCat
+  usecase "Filter by price" as UC_FilterPrice
+  usecase "View listing details" as UC_ViewListing
+
+  usecase "Sign up" as UC_SignUp
+  usecase "Sign in" as UC_SignIn
+  usecase "Sign out" as UC_SignOut
+  usecase "View / update profile" as UC_Profile
+
+  usecase "Send message" as UC_SendMsg
+  usecase "View inbox & threads" as UC_Inbox
+
+  usecase "Create listing" as UC_CreateListing
+  usecase "Upload listing images" as UC_UploadImages
+  usecase "Edit listing" as UC_EditListing
+  usecase "Mark sold" as UC_MarkSold
+
+  usecase "Manage categories" as UC_ManageCats
+  usecase "Manage books" as UC_ManageBooks
+  usecase "Approve listings" as UC_Approve
+  usecase "Lock / unlock users" as UC_LockUsers
+}
+
+Guest --> UC_Browse
+Guest --> UC_FilterCat
+Guest --> UC_FilterPrice
+Guest --> UC_ViewListing
+Guest --> UC_SignUp
+Guest --> UC_SignIn
+
+User --> UC_Browse
+User --> UC_FilterCat
+User --> UC_FilterPrice
+User --> UC_ViewListing
+User --> UC_Profile
+User --> UC_Inbox
+User --> UC_SendMsg
+User --> UC_SignOut
+
+Seller --|> User
+Seller --> UC_CreateListing
+Seller --> UC_UploadImages
+Seller --> UC_EditListing
+Seller --> UC_MarkSold
+
+Admin --|> User
+Admin --> UC_ManageCats
+Admin --> UC_ManageBooks
+Admin --> UC_Approve
+Admin --> UC_LockUsers
+
+UC_CreateListing .> UC_UploadImages : include
+@enduml
