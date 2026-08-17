@@ -9,6 +9,9 @@ export const setText = (el, text) => {
 };
 
 export const fmtVnd = (value) => {
+  if (value == null) {
+    return "";
+  }
   const num = Number(value);
   if (!Number.isFinite(num)) {
     return "";
