@@ -141,8 +141,16 @@ export const init = async (opts = {}) => {
     }
 
     if (memberSince) {
+      memberSince.innerHTML = "";
+      memberSince.className = "flex items-center gap-2";
+      const icon = document.createElement("span");
+      icon.className = "material-symbols-outlined text-base";
+      icon.textContent = "calendar_today";
       const year = user?.created_at ? new Date(user.created_at).getFullYear() : null;
-      memberSince.innerHTML = `<span class="material-symbols-outlined text-base">calendar_today</span> Member since ${year || "—"}`;
+      const label = document.createElement("span");
+      label.textContent = `Member since ${year || "—"}`;
+      memberSince.appendChild(icon);
+      memberSince.appendChild(label);
     }
 
     const sid = isSelf ? self?.id : targetId;

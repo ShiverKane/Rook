@@ -332,16 +332,44 @@ const renderCrud = async (mount) => {
         for (const c of categories || []) {
           const tr = document.createElement("tr");
           tr.className = "hover:bg-surface-container-low/30 transition-colors";
-          tr.innerHTML = `
-            <td class="px-4 py-3 text-body-md text-on-surface">${c.id}</td>
-            <td class="px-4 py-3 text-body-md text-on-surface">${c.name || ""}</td>
-            <td class="px-4 py-3 text-body-md text-on-surface-variant">${c.description || ""}</td>
-            <td class="px-4 py-3 text-body-md">
-              <button data-cat-edit="${c.id}" class="text-primary hover:underline">Edit</button>
-              <span class="text-outline px-2">|</span>
-              <button data-cat-del="${c.id}" class="text-error hover:underline">Delete</button>
-            </td>
-          `;
+
+          const tdId = document.createElement("td");
+          tdId.className = "px-4 py-3 text-body-md text-on-surface";
+          tdId.textContent = c.id;
+
+          const tdName = document.createElement("td");
+          tdName.className = "px-4 py-3 text-body-md text-on-surface";
+          tdName.textContent = c.name || "";
+
+          const tdDesc = document.createElement("td");
+          tdDesc.className = "px-4 py-3 text-body-md text-on-surface-variant";
+          tdDesc.textContent = c.description || "";
+
+          const tdActions = document.createElement("td");
+          tdActions.className = "px-4 py-3 text-body-md";
+
+          const editBtn = document.createElement("button");
+          editBtn.className = "text-primary hover:underline";
+          editBtn.textContent = "Edit";
+          editBtn.setAttribute("data-cat-edit", c.id);
+
+          const sep = document.createElement("span");
+          sep.className = "text-outline px-2";
+          sep.textContent = "|";
+
+          const delBtn = document.createElement("button");
+          delBtn.className = "text-error hover:underline";
+          delBtn.textContent = "Delete";
+          delBtn.setAttribute("data-cat-del", c.id);
+
+          tdActions.appendChild(editBtn);
+          tdActions.appendChild(sep);
+          tdActions.appendChild(delBtn);
+
+          tr.appendChild(tdId);
+          tr.appendChild(tdName);
+          tr.appendChild(tdDesc);
+          tr.appendChild(tdActions);
           catRows.appendChild(tr);
         }
       }
@@ -351,17 +379,49 @@ const renderCrud = async (mount) => {
         for (const b of books || []) {
           const tr = document.createElement("tr");
           tr.className = "hover:bg-surface-container-low/30 transition-colors";
-          tr.innerHTML = `
-            <td class="px-4 py-3 text-body-md text-on-surface">${b.id}</td>
-            <td class="px-4 py-3 text-body-md text-on-surface">${b.title || ""}</td>
-            <td class="px-4 py-3 text-body-md text-on-surface-variant">${b.author || ""}</td>
-            <td class="px-4 py-3 text-body-md text-on-surface-variant">${b.category_id ?? ""}</td>
-            <td class="px-4 py-3 text-body-md">
-              <button data-book-edit="${b.id}" class="text-primary hover:underline">Edit</button>
-              <span class="text-outline px-2">|</span>
-              <button data-book-del="${b.id}" class="text-error hover:underline">Delete</button>
-            </td>
-          `;
+
+          const tdId = document.createElement("td");
+          tdId.className = "px-4 py-3 text-body-md text-on-surface";
+          tdId.textContent = b.id;
+
+          const tdTitle = document.createElement("td");
+          tdTitle.className = "px-4 py-3 text-body-md text-on-surface";
+          tdTitle.textContent = b.title || "";
+
+          const tdAuthor = document.createElement("td");
+          tdAuthor.className = "px-4 py-3 text-body-md text-on-surface-variant";
+          tdAuthor.textContent = b.author || "";
+
+          const tdCategory = document.createElement("td");
+          tdCategory.className = "px-4 py-3 text-body-md text-on-surface-variant";
+          tdCategory.textContent = b.category_id == null ? "" : String(b.category_id);
+
+          const tdActions = document.createElement("td");
+          tdActions.className = "px-4 py-3 text-body-md";
+
+          const editBtn = document.createElement("button");
+          editBtn.className = "text-primary hover:underline";
+          editBtn.textContent = "Edit";
+          editBtn.setAttribute("data-book-edit", b.id);
+
+          const sep = document.createElement("span");
+          sep.className = "text-outline px-2";
+          sep.textContent = "|";
+
+          const delBtn = document.createElement("button");
+          delBtn.className = "text-error hover:underline";
+          delBtn.textContent = "Delete";
+          delBtn.setAttribute("data-book-del", b.id);
+
+          tdActions.appendChild(editBtn);
+          tdActions.appendChild(sep);
+          tdActions.appendChild(delBtn);
+
+          tr.appendChild(tdId);
+          tr.appendChild(tdTitle);
+          tr.appendChild(tdAuthor);
+          tr.appendChild(tdCategory);
+          tr.appendChild(tdActions);
           bookRows.appendChild(tr);
         }
       }
@@ -600,17 +660,33 @@ const handleRoute = async () => {
       mount.appendChild(node.firstChild);
     }
   } catch (e) {
-    mount.innerHTML = `
-      <main class="max-w-container-max mx-auto px-margin-page py-stack-lg">
-        <div class="bg-surface-container-lowest border border-outline-variant/20 rounded-xl p-6">
-          <div class="font-headline-md text-headline-md text-on-surface">Couldn't load view</div>
-          <div class="text-on-surface-variant mt-2">${e.message || ""}</div>
-          <div class="mt-4">
-            <a class="text-primary hover:underline" href="./pages/home.html">Open multi-page version</a>
-          </div>
-        </div>
-      </main>
-    `;
+    const shell = document.createElement("main");
+    shell.className = "max-w-container-max mx-auto px-margin-page py-stack-lg";
+    const box = document.createElement("div");
+    box.className = "bg-surface-container-lowest border border-outline-variant/20 rounded-xl p-6";
+
+    const title = document.createElement("div");
+    title.className = "font-headline-md text-headline-md text-on-surface";
+    title.textContent = "Couldn't load view";
+
+    const msg = document.createElement("div");
+    msg.className = "text-on-surface-variant mt-2";
+    msg.textContent = e.message || "";
+
+    const actions = document.createElement("div");
+    actions.className = "mt-4";
+    const link = document.createElement("a");
+    link.className = "text-primary hover:underline";
+    link.href = "./pages/home.html";
+    link.textContent = "Open multi-page version";
+    actions.appendChild(link);
+
+    box.appendChild(title);
+    box.appendChild(msg);
+    box.appendChild(actions);
+    shell.appendChild(box);
+    mount.innerHTML = "";
+    mount.appendChild(shell);
     return;
   }
 
